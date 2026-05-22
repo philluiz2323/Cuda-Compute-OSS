@@ -1,8 +1,29 @@
 # CUDA Kernel Optimization Guide
 
-This document is **maintained by the optimization agent**. As kernels are optimized, the agent summarizes effective optimization strategies here, organized by kernel type and by cross-kernel pattern. This serves as a growing knowledge base for future optimization runs.
+This document is the project's long-term artifact. It is **maintained by the optimization agent** during runs and refined by human contributors during review. As kernels are optimized, the agent summarises effective strategies here, organised by kernel type and by cross-kernel pattern. Future runs read this file before forming hypotheses.
 
-When investigating a specific bottleneck, read the relevant files in `docs/` directly (e.g. `docs/stall_reasons.md`, `docs/memory_optimization.md`, `docs/compute_optimization.md`, `docs/arch_notes.md`).
+When investigating a specific bottleneck, read the relevant files in `docs/` directly (`docs/stall_reasons.md`, `docs/memory_optimization.md`, `docs/compute_optimization.md`, `docs/arch_notes.md`).
+
+## Format
+
+Two tiers:
+
+- **Per-kernel sections** — one section per `KERNEL_TYPE`. Each contains a *Characteristics* block (bottleneck class, access pattern, typical sizes), an *Effective Optimizations* numbered list (technique → why it works → expected speedup → bottleneck tags in brackets), and an *Anti-patterns* list (what was tried and the observed regression).
+- **Cross-Kernel Optimization Patterns** (at the bottom) — indexed by bottleneck tag, not by kernel. Promote a pattern here when it has been confirmed in **≥3 accepted experiments across ≥2 distinct kernel types**, with consistent direction of effect.
+
+Bottleneck tags currently in use: `[register-pressure]`, `[occupancy]`, `[launch-config]`, `[cache]`, `[memory-coalescing]`, `[vectorized-loads]`, `[tensor-core]`, `[tile-size]`, `[memory-access]`, `[warp-divergence]`, `[algorithmic]`, `[data-type]`.
+
+## Rules for an entry
+
+- Cite the source kernel and link to the originating row in `workspace/results.tsv` or the relevant `memory/<kernel_type>.md` reflexion block.
+- Quote concrete numbers (`register count 96 → 39`, `+40% latency`, `L1 hit rate 0% → 32%`), not adjectives.
+- Identify the **bottleneck** the technique addresses, not just the **change** that was made.
+- For anti-patterns: explain *why* it failed, with NCU evidence where available.
+- One technique per entry. If a change combines two effects, file two entries that cross-reference each other.
+
+What does **not** belong here: one-off shape-specific tunings, speculation without experiment data, code samples (the KB describes *what* and *why*; the kernel source is *how*).
+
+See [CONTRIBUTING.md § Knowledge-base contributions](CONTRIBUTING.md#knowledge-base-contributions) for the human-PR side of this.
 
 ---
 

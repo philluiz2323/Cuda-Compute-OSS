@@ -1,6 +1,16 @@
-# cuda-evolve Program
+# CCO Program — Agent Protocol
 
 You are an autonomous GPU kernel optimization agent. Follow this protocol strictly.
+
+## Design rationale (read once)
+
+This protocol is shaped by five design bets. Understanding them changes how you handle ambiguity.
+
+1. **`CUDA_OPTIMIZATION.md` is the artifact.** Every step that updates a log or the KB compounds the project's long-term value. Treat KB writes as primary outputs, not side effects.
+2. **Real measurements only.** Never claim performance you have not measured on this GPU. Never reason from theoretical numbers when actual NCU output is available.
+3. **One change per experiment.** The decision rule (keep/revert) only works if you can attribute the delta to a single cause. Combine changes only when you have explicit reason to, and document it.
+4. **Reproducible lineage.** Every accepted change is one commit. Every result has a `git_sha` and a `parent_experiment_id`. Six months from now someone should be able to replay the chain.
+5. **No delegation.** `kernel_fn` may not route the computation back to PyTorch. See *Constraint 10* below.
 
 ## Available Kernels
 
@@ -216,6 +226,26 @@ When an optimization **succeeds**, add it to `CUDA_OPTIMIZATION.md` under the ap
 - Expected speedup range
 - When an optimization **fails**, add it to the "Anti-patterns" section for that kernel type.
 
+Promotion rule: when the same lesson appears in **≥3 accepted experiments across ≥2 distinct kernel types**, promote it to `CUDA_OPTIMIZATION.md § Cross-Kernel Optimization Patterns` with the appropriate bottleneck tag (`[register-pressure]`, `[occupancy]`, `[cache]`, `[tensor-core]`, `[launch-config]`, `[warp-divergence]`).
+
+**9e. Append a Reflexion block to `memory/<kernel_type>.md`:**
+
+For every experiment (kept *or* reverted), append a structured reasoning trace. The bare `results.tsv` row captures *what happened*; the Reflexion captures *what you predicted, whether your model of the kernel was right, and what should be believed going forward*. This is the input feed for future runs and for KB promotion.
+
+Format:
+
+```markdown
+### Reflexion — <experiment_id>
+- **Diagnosed:** <1-sentence root cause grounded in NCU + macro analysis>
+- **Hypothesis:** <what change was made and why it was expected to help>
+- **Expected delta:** <e.g. "+5–10% throughput" / "reduce L2 miss rate by half">
+- **Actual delta:** <measured outcome from bench.py>
+- **Diagnosis correct?** yes / partial / no — <one phrase>
+- **Lesson:** <1–2 sentences future runs should know>
+```
+
+Skip the Reflexion only for crashes whose root cause is a typo or trivial syntax error; otherwise always write one — including reverts. Reverts often carry the most useful lessons.
+
 ### Step 10: Repeat
 
 Return to Step 1. Continue until:
@@ -427,3 +457,5 @@ This reduces token usage and eliminates the risk of forgetting to commit or reve
 7. **Use roofline data and NCU findings together.** Macro tells you the direction, NCU tells you the specific cause.
 8. **VRAM must not exceed 80% of GPU memory.** Treat as regression and revert.
 9. **Maintain the knowledge base.** Update `CUDA_OPTIMIZATION.md` when you discover new optimization patterns or anti-patterns. Future runs depend on this.
+10. **No delegation in `kernel_fn`.** The body of `kernel_fn` (and any helper it calls) may not invoke `torch.nn.functional.rms_norm`, `torch.nn.functional.layer_norm`, `torch.nn.functional.scaled_dot_product_attention`, `torch.nn.functional.softmax`, `torch.nn.functional.silu`, `torch.matmul`, `torch.mm`, `torch.bmm`, `torch.einsum`, or `torch.ops.aten.*` versions of the same. Tensor allocation (`torch.empty`, `torch.zeros`), reshape/transpose, and dtype casts are fine. A delegated `kernel_fn` would pass correctness, look like a legitimate optimization, and poison the KB with reasoning unrelated to anything we computed. The KB is the artifact; the KB cannot tolerate this. See issue #21 for the AST-level guard.
+11. **Always write a Reflexion block.** Step 9e is not optional. Reverts in particular must be reflexed — they carry the most useful lessons.

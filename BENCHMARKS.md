@@ -2,6 +2,10 @@
 
 Public benchmark results for CCO. All numbers come from real GPUs running the unmodified bench harness — no simulators, no estimates.
 
+> **Status: awaiting first submissions.** Most rows below are placeholders (`_TBD_`). Filling them is a high-leverage contribution — see [#5](https://github.com/zeokin/Cuda-OSS/issues/5) for the seeding effort and [#17](https://github.com/zeokin/Cuda-OSS/issues/17) for the `rms_norm` first-contribution path. A row with no data is intentional; a row with fabricated data is a project-level integrity failure.
+>
+> Submissions are gated by [#1](https://github.com/zeokin/Cuda-OSS/issues/1) (baseline kernels must ship before optimizations can be measured against them).
+
 ## How to Read These Tables
 
 - **Baseline** — performance of the kernel in `kernels/<name>.py` before any agent intervention
