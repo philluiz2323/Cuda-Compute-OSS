@@ -891,7 +891,7 @@ def main():
     parser.add_argument("--profile", action="store_true",
                         help="Enable torch profiler trace")
     parser.add_argument("--json", action="store_true",
-                        help="Emit one JSON metrics object to stdout")
+                        help="Emit one JSON metrics object to stdout; human-readable output goes to stderr")
     args = parser.parse_args()
     json_stdout = sys.stdout
     if args.json:
