@@ -60,6 +60,8 @@ DENY_QUALIFIED_NAMES = frozenset({
     # high-level fused ops reachable as torch.<name> (the runtime trap bans these too — keep the
     # static layer aligned so they are rejected at Gate 3, before any GPU spend)
     "torch.rms_norm", "torch.layer_norm", "torch.group_norm", "torch.silu", "torch.glu",
+    # quantized / packed GEMM — fp8/int8 tensor-core matmul is delegation just like torch.matmul
+    "torch._scaled_mm", "torch._int_mm",
 })
 
 # Whole namespaces that are off-limits (prefix match).
@@ -69,6 +71,8 @@ DENY_QUALIFIED_PREFIXES = (
     "torch._C",                   # private dispatch
     "torch.linalg",               # high-level linear algebra
     "torch.utils.cpp_extension",  # load / load_inline -> inline CUDA-C path (banned in v1)
+    "torch.overrides",            # mode-stack internals (_pop_mode/_push_mode) — popping the runtime trap
+    "torch.utils._python_dispatch",  # _disable_current_modes/_pop_mode — neutering the runtime trap
 )
 
 # Tensor methods that ARE the computation, flagged on any receiver (we usually can't
@@ -470,6 +474,16 @@ _NEGATIVE_CASES = [
      "not-a-kernel"),
     ("aten ops escape",
      "import torch\ndef kernel_fn(a, b):\n    return torch.ops.aten.mm(a, b)\n",
+     "delegation"),
+    ("fp8 GEMM via torch._scaled_mm",
+     "import torch\ndef kernel_fn(a, b, sa, sb):\n    return torch._scaled_mm(a, b, sa, sb)\n",
+     "delegation"),
+    ("pop the runtime trap via torch.overrides",
+     "import torch\ndef kernel_fn(a, b):\n    torch.overrides._pop_mode()\n    return torch.empty_like(a)\n",
+     "delegation"),
+    ("neuter trap via torch.utils._python_dispatch",
+     ("import torch\ndef kernel_fn(a, b):\n"
+      "    torch.utils._python_dispatch._disable_current_modes()\n    return torch.mm(a, b)\n"),
      "delegation"),
 ]
 

@@ -194,7 +194,7 @@ def _child_main(job_path: str, out_path: str) -> int:
                     _mut_k[(1,)](_flats[buf_idx], float((gi % 211) + 37))
 
             g = 0                                                   # global timed-call index
-            with delegation_trap():
+            with delegation_trap() as _trap_verify:
                 for i in range(min(n_pre, nb)):
                     scored_val.append(_to_cpu(kernel_fn(**bufs[i])))
 
@@ -207,6 +207,7 @@ def _child_main(job_path: str, out_path: str) -> int:
                 e = _Event(enable_timing=True)
                 _t0 = _perf()
                 for blk in range(n_blk):
+                    _trap_verify()         # between blocks: catch a kernel that popped the trap mid-loop
                     is_cap = blk in cap_blocks
                     s.record()
                     for r in range(rep):

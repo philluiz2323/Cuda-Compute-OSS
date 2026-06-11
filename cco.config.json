@@ -30,10 +30,12 @@
         "torch.mv", "torch.dot", "torch.vdot", "torch.chain_matmul", "torch.kron",
         "torch.conv1d", "torch.conv2d", "torch.conv3d", "torch.conv_transpose2d",
         "torch.softmax", "torch.log_softmax",
-        "torch.rms_norm", "torch.layer_norm", "torch.group_norm", "torch.silu", "torch.glu"
+        "torch.rms_norm", "torch.layer_norm", "torch.group_norm", "torch.silu", "torch.glu",
+        "torch._scaled_mm", "torch._int_mm"
       ],
       "deny_qualified_prefixes": [
-        "torch.nn.functional", "torch.ops", "torch._C", "torch.linalg", "torch.utils.cpp_extension"
+        "torch.nn.functional", "torch.ops", "torch._C", "torch.linalg", "torch.utils.cpp_extension",
+        "torch.overrides", "torch.utils._python_dispatch"
       ],
       "deny_methods": [
         "matmul", "mm", "bmm", "addmm", "baddbmm", "addbmm", "einsum", "tensordot",
@@ -59,7 +61,8 @@
         "conv_transpose1d", "conv_transpose2d", "conv_transpose3d",
         "scaled_dot_product_attention",
         "softmax", "log_softmax", "layer_norm", "rms_norm", "group_norm",
-        "silu", "glu", "__matmul__", "__imatmul__"
+        "silu", "glu", "__matmul__", "__imatmul__",
+        "_scaled_mm", "_int_mm"
       ],
       "deny_aten_ops": [
         "mm", "matmul", "bmm", "addmm", "addbmm", "baddbmm", "_addmm_activation",
@@ -75,7 +78,9 @@
         "softmax", "_softmax", "_safe_softmax", "log_softmax", "_log_softmax",
         "layer_norm", "native_layer_norm", "rms_norm", "_fused_rms_norm",
         "group_norm", "native_group_norm",
-        "silu", "silu_", "glu"
+        "silu", "silu_", "glu",
+        "_scaled_mm", "_int_mm", "_weight_int8pack_mm", "_weight_int4pack_mm",
+        "_convert_weight_to_int4pack", "_mixed_dtypes_linear"
       ]
     }
   },
