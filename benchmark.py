@@ -1133,15 +1133,23 @@ def main():
         print("\n=== SCORING (isolated subprocess) ===")
         try:
             from cco.isolate import run_isolated
-            score_sample = run_isolated(kernel_path, config, args.seed, _do_compare)
+            score_sample = run_isolated(kernel_path, config, args.seed, _do_compare, quick=args.quick)
         except Exception as e:
             print(f"score_error: {type(e).__name__}: {e}")
             traceback.print_exc()
         if score_sample and score_sample.get("error"):
             print(f"score_error: {score_sample['error']}")
-        _v = "PASS" if (score_sample and score_sample.get("correct")) else "FAIL"
-        correctness_results = {"correctness": _v, "smoke_test": _v, "shape_sweep": "SKIP",
-                               "numerical_stability": "SKIP", "determinism": "SKIP", "edge_cases": "SKIP"}
+        # The full 5-stage verdict comes from the ISOLATED run (parent-validated), not the
+        # forgeable in-process path.
+        _stages = (score_sample or {}).get("stages") or {}
+        correctness_results = {
+            "correctness": _stages.get("correctness", "FAIL"),
+            "smoke_test": _stages.get("smoke_test", "FAIL"),
+            "shape_sweep": _stages.get("shape_sweep", "FAIL"),
+            "numerical_stability": _stages.get("numerical_stability", "FAIL"),
+            "determinism": _stages.get("determinism", "FAIL"),
+            "edge_cases": _stages.get("edge_cases", "FAIL"),
+        }
     else:
         print("\n=== CORRECTNESS ===")
         try:
