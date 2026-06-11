@@ -1274,6 +1274,8 @@ def main():
         print(f"score_median_us: {sc['median_us']:.4f}")
         print(f"score_roofline_floor_us: {sc.get('roofline_floor_us', 0.0):.4f}")
         print(f"score_below_floor: {sc.get('below_floor')}")
+        print(f"score_probe_ok: {sc.get('probe_ok')}")
+        print(f"score_n_probes: {sc.get('n_probes')}")
         print(f"score_mean_us: {sc['mean_us']:.4f}")
         print(f"score_stdev_us: {sc['stdev_us']:.4f}")
         print(f"score_n_blocks: {sc['n_blocks']}")
