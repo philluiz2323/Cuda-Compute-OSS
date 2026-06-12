@@ -122,12 +122,21 @@ def _child_main(job_path: str, out_path: str) -> int:
     # reaches scoring without the static gate. Re-scan the exact bytes about to execute (the canonical
     # denylists are the module defaults, kept equal to cco.config.json by the consistency self-test);
     # any violation aborts cleanly as a delegation result instead of running unguarded.
+    # Read the source EXACTLY as CPython's loader will (tokenize.open honors the BOM / PEP-263 coding
+    # cookie), so the scanned bytes cannot diverge from the executed bytes via a declared source encoding.
+    import tokenize
+
     from cco.guard_kernel import DEFAULT_POLICY, scan_source
-    with open(job["kernel_path"], "r", encoding="utf-8") as _kf:
-        _gate4_violations = scan_source(_kf.read(), DEFAULT_POLICY, filename=job["kernel_path"])
-    if _gate4_violations:
+    try:
+        with tokenize.open(job["kernel_path"]) as _kf:
+            _gate4_violations = scan_source(_kf.read(), DEFAULT_POLICY, filename=job["kernel_path"])
+    except (OSError, ValueError, LookupError, SyntaxError) as _e:  # unreadable / undecodable source -> closed
+        delegation = f"static-guard Gate-4 re-scan: unreadable kernel source: {type(_e).__name__}: {_e}"
+        _gate4_violations = []
+    if delegation is None and _gate4_violations:
         v = _gate4_violations[0]
         delegation = f"static-guard Gate-4 re-scan: {v.category}: {v.message} (line {v.lineno})"
+    if delegation is not None:
         kernel_fn = None
     else:
         spec = importlib.util.spec_from_file_location("cco_submission_kernel", job["kernel_path"])

@@ -391,13 +391,11 @@ class _Scanner(ast.NodeVisitor):
         func = node.func
 
         if isinstance(func, ast.Name):
-            if func.id in self.policy.deny_builtins:
-                self._add("dynamic-dispatch",
-                          f"call to `{func.id}()` (dynamic dispatch / code execution is forbidden)", node)
-            else:
-                qualified = _resolve([func.id], self.aliases)
-                if _is_denied_qualified(qualified, self.policy):
-                    self._add("delegation", f"call to forbidden `{qualified}()`", node)
+            # A denied builtin as the callee (getattr(...), eval(...), open(...)) is caught by visit_Name,
+            # which fires on the func Name via generic_visit — and ALSO catches it when passed as a value.
+            qualified = _resolve([func.id], self.aliases)
+            if _is_denied_qualified(qualified, self.policy):
+                self._add("delegation", f"call to forbidden `{qualified}()`", node)
 
         elif isinstance(func, ast.Attribute):
             # The method/attribute name (leaf) is always known, even when the receiver is
@@ -425,6 +423,25 @@ class _Scanner(ast.NodeVisitor):
         if node.attr in self.policy.deny_dunder_attrs:
             self._add("dynamic-dispatch",
                       f"access to `.{node.attr}` (introspection escape that defeats the name scan)", node)
+        # Flag a string-keyed dispatch method on its BARE access, not just when it is the call target:
+        # `fmt = str.format; fmt('{0.f_back}', e)` binds the bound method to a name and calls it later,
+        # so visit_Call never sees `.format` as the callee. The bare attribute access is the chokepoint.
+        elif node.attr in _STRING_DISPATCH_METHODS and node.attr in self.policy.deny_methods:
+            self._add("dynamic-dispatch",
+                      f"access to `.{node.attr}` (string-keyed attribute/format dispatch — defeats the "
+                      f"name scan even when bound to a name and called later)", node)
+        self.generic_visit(node)
+
+    # --- bare name references: a banned builtin used as a VALUE (not as the call target) is still a
+    #     dynamic-dispatch primitive. `functools.reduce(getattr, ['__traceback__','tb_frame','f_back',
+    #     'f_locals'], e)` smuggles `getattr` into an allowlisted higher-order function; without this,
+    #     visit_Call (which only inspects the callee) never sees it. Flag any Load of a denied builtin
+    #     name — including the call-target case, which is harmless overlap (the kernel is rejected). ---
+    def visit_Name(self, node):
+        if isinstance(node.ctx, ast.Load) and node.id in self.policy.deny_builtins:
+            self._add("dynamic-dispatch",
+                      f"reference to `{node.id}` (dynamic-dispatch primitive — forbidden even when passed "
+                      f"as a value into another call)", node)
         self.generic_visit(node)
 
     # --- imports (ALLOWLIST) ---
@@ -697,6 +714,30 @@ _NEGATIVE_CASES = [
      ("import torch\ndef kernel_fn(a, b):\n    m = torch.cuda.memory_allocated()\n"
       "    return a + b if m else a\n"),
      "delegation"),
+    ("name-bound str.format field access (bound method called later, not at the .format site)",
+     ("import torch\ndef kernel_fn(a, b):\n    fmt = str.format\n"
+      "    try:\n        raise RuntimeError()\n"
+      "    except RuntimeError as e:\n"
+      "        s = fmt('{0.__traceback__.tb_frame.f_back.f_back.f_locals}', e)\n"
+      "    return s\n"),
+     "dynamic-dispatch"),
+    ("name-bound .format on a template string variable",
+     ("import torch\ndef kernel_fn(a, b):\n"
+      "    tmpl = '{0.__traceback__.tb_frame.f_back.f_back.f_locals}'\n    f = tmpl.format\n"
+      "    try:\n        raise RuntimeError()\n"
+      "    except RuntimeError as e:\n        return f(e)\n"),
+     "dynamic-dispatch"),
+    ("getattr smuggled as a VALUE into functools.reduce (higher-order frame walk)",
+     ("import torch\nfrom functools import reduce\ndef kernel_fn(a, b):\n"
+      "    try:\n        raise RuntimeError()\n"
+      "    except RuntimeError as e:\n"
+      "        loc = reduce(getattr, ['__traceback__', 'tb_frame', 'f_back', 'f_back', 'f_locals'], e)\n"
+      "    return loc['probe_set']\n"),
+     "dynamic-dispatch"),
+    ("getattr-as-value via aliased names",
+     ("import torch\nfrom functools import reduce as _rd\ndef kernel_fn(a, b):\n    g = getattr\n"
+      "    return _rd(g, ['__class__'], b)\n"),
+     "dynamic-dispatch"),
 ]
 
 
