@@ -13,6 +13,9 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from matmul import gemm
+from matmul.config import Config as _Config
+
 
 def _gpu_available() -> bool:
     try:
@@ -92,18 +95,70 @@ def test_public_matmul_matches_numpy():
     assert np.allclose(C, A @ B, rtol=1e-3, atol=1e-3)
 
 
+# ---------------------------------------------------------------------------
+# auto_tile VRAM-estimate parity (pure arithmetic -- no GPU needed)
+# ---------------------------------------------------------------------------
+class _FakeBackend:
+    """Exposes only what ``auto_tile`` needs, so this runs without a GPU."""
+
+    def __init__(self, free_bytes: int):
+        self._free = free_bytes
+
+    def free_compute_bytes(self) -> int:
+        return self._free
+
+
+def test_auto_tile_accounts_for_fp16_accumulate_fp32_peak():
+    # fp16 + accumulate_fp32 upcasts each K-tile to fp32 before bmm; auto_tile
+    # must budget acc + two fp32 tiles + fp32 product, not item_bytes tiles.
+    cfg = _Config(dtype="fp16", accumulate_fp32=True, vram_fraction=0.9, verbose=False)
+    free = 256 * 1024 * 1024
+    T = gemm.auto_tile(10000, cfg, _FakeBackend(free))
+
+    budget = int(free * cfg.vram_fraction)
+    per_fp32 = 4 * cfg.acc_dtype.itemsize
+    per_naive = cfg.acc_dtype.itemsize + 2 * cfg.item_bytes
+    t_fp32 = int((budget / per_fp32) ** 0.5)
+    t_naive = int((budget / per_naive) ** 0.5)
+    t_fp32 = max(128, (min(t_fp32, 10000) // 128) * 128)
+    t_naive = max(128, (min(t_naive, 10000) // 128) * 128)
+
+    assert T == t_fp32
+    assert T < t_naive
+
+
+def test_auto_tile_unchanged_for_fp32():
+    cfg = _Config(dtype="fp32", vram_fraction=0.9, verbose=False)
+    free = 128 * 1024 * 1024
+    T = gemm.auto_tile(8000, cfg, _FakeBackend(free))
+
+    budget = int(free * cfg.vram_fraction)
+    per = cfg.acc_dtype.itemsize + 2 * cfg.item_bytes
+    expected = int((budget / per) ** 0.5)
+    expected = max(128, (min(expected, 8000) // 128) * 128)
+    assert T == expected
+
+
+_NO_GPU_TESTS = {
+    "test_auto_tile_accounts_for_fp16_accumulate_fp32_peak",
+    "test_auto_tile_unchanged_for_fp32",
+}
+
+
 if __name__ == "__main__":
-    if not HAVE_GPU:
-        print("SKIP  all tests (no CUDA/MPS GPU; CCO computes on GPU only)")
-        sys.exit(0)
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
+    skipped = 0
     for fn in fns:
+        if fn.__name__ not in _NO_GPU_TESTS and not HAVE_GPU:
+            skipped += 1
+            print(f"SKIP  {fn.__name__} (no CUDA/MPS GPU; CCO computes on GPU only)")
+            continue
         try:
             fn()
             print(f"PASS  {fn.__name__}")
         except AssertionError as e:
             failed += 1
             print(f"FAIL  {fn.__name__}: {e}")
-    print(f"\n{len(fns) - failed}/{len(fns)} passed")
+    print(f"\n{len(fns) - failed - skipped}/{len(fns)} passed ({skipped} skipped)")
     sys.exit(1 if failed else 0)

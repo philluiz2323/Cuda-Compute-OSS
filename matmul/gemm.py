@@ -30,9 +30,15 @@ def auto_tile(n: int, cfg: Config, backend: Backend) -> int:
 
     Working set per (i,j,k) step on the device:
         acc (T x T, acc_dtype)  +  (A-tile + B-tile) (T x T, item)
+        When accumulate_fp32 upcasts fp16 tiles, budget fp32 tile buffers and
+        the fp32 product scratch instead of item-sized tiles.
     """
     budget = int(backend.free_compute_bytes() * cfg.vram_fraction)
-    per_elem = cfg.acc_dtype.itemsize + 2 * cfg.item_bytes
+    if cfg.np_dtype == np.float16 and cfg.accumulate_fp32:
+        # acc + fp32 A-tile + fp32 B-tile + fp32 bmm output (peak overlap).
+        per_elem = 4 * cfg.acc_dtype.itemsize
+    else:
+        per_elem = cfg.acc_dtype.itemsize + 2 * cfg.item_bytes
     t = int(math.sqrt(max(1, budget) / per_elem))
     t = min(t, n)
     # Round down to a multiple of 128 for nicer GEMM shapes; keep a sane floor.
