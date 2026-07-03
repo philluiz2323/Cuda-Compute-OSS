@@ -13,6 +13,11 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Importing these does not touch torch (only instantiating Backend does), so
+# they're safe to use in GPU-free logic tests below.
+from matmul import gemm
+from matmul.config import Config as _Config
+
 
 def _gpu_available() -> bool:
     try:
@@ -92,18 +97,64 @@ def test_public_matmul_matches_numpy():
     assert np.allclose(C, A @ B, rtol=1e-3, atol=1e-3)
 
 
+# ---------------------------------------------------------------------------
+# _fits_in_core VRAM-estimate parity (pure arithmetic -- no GPU needed)
+# ---------------------------------------------------------------------------
+class _FakeBackend:
+    """Exposes only what `_fits_in_core` needs, so this runs without a GPU."""
+
+    def __init__(self, free_bytes: int):
+        self._free = free_bytes
+
+    def free_compute_bytes(self) -> int:
+        return self._free
+
+
+def test_fits_in_core_accounts_for_fp16_accumulate_fp32_peak():
+    # _gemm_in_core's fp16+accumulate_fp32 branch holds, at peak: fp16 a,
+    # fp16 b, their fp32 upcasts, and the fp32 matmul output -- not just
+    # three item_bytes-sized buffers. _fits_in_core must budget for that.
+    n = 4096
+    cfg = _Config(dtype="fp16", accumulate_fp32=True, vram_fraction=0.9, verbose=False)
+    real_peak = n * n * (2 + 2 + 4 + 4 + 4)  # a, b, a32, b32, fp32 bmm output
+
+    narrow_budget = int(real_peak * 0.8 / cfg.vram_fraction)
+    assert not gemm._fits_in_core(n, cfg, _FakeBackend(narrow_budget))
+
+    wide_budget = int(real_peak * 1.2 / cfg.vram_fraction)
+    assert gemm._fits_in_core(n, cfg, _FakeBackend(wide_budget))
+
+
+def test_fits_in_core_unchanged_for_fp32():
+    # No upcast branch outside fp16+accumulate_fp32 -- estimate stays the
+    # exact three-buffer count.
+    n = 2048
+    cfg = _Config(dtype="fp32", vram_fraction=0.9, verbose=False)
+    need = 3 * n * n * cfg.item_bytes
+    assert gemm._fits_in_core(n, cfg, _FakeBackend(int(need / cfg.vram_fraction) + 1))
+    assert not gemm._fits_in_core(n, cfg, _FakeBackend(int(need / cfg.vram_fraction) - 1024))
+
+
+_NO_GPU_TESTS = {
+    "test_fits_in_core_accounts_for_fp16_accumulate_fp32_peak",
+    "test_fits_in_core_unchanged_for_fp32",
+}
+
+
 if __name__ == "__main__":
-    if not HAVE_GPU:
-        print("SKIP  all tests (no CUDA/MPS GPU; CCO computes on GPU only)")
-        sys.exit(0)
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
+    skipped = 0
     for fn in fns:
+        if fn.__name__ not in _NO_GPU_TESTS and not HAVE_GPU:
+            skipped += 1
+            print(f"SKIP  {fn.__name__} (no CUDA/MPS GPU; CCO computes on GPU only)")
+            continue
         try:
             fn()
             print(f"PASS  {fn.__name__}")
         except AssertionError as e:
             failed += 1
             print(f"FAIL  {fn.__name__}: {e}")
-    print(f"\n{len(fns) - failed}/{len(fns)} passed")
+    print(f"\n{len(fns) - failed - skipped}/{len(fns)} passed ({skipped} skipped)")
     sys.exit(1 if failed else 0)

@@ -41,8 +41,14 @@ def auto_tile(n: int, cfg: Config, backend: Backend) -> int:
 
 
 def _fits_in_core(n: int, cfg: Config, backend: Backend) -> bool:
-    # A, B, C resident on the device at once.
-    need = 3 * n * n * cfg.item_bytes
+    # A, B, C resident on the device at once. For fp16 with accumulate_fp32,
+    # _gemm_in_core also holds transient fp32 upcasts of A and B plus the
+    # fp32 matmul output alongside the resident fp16 A/B -- budget for that
+    # peak too, not just the three item_bytes-sized buffers.
+    if cfg.np_dtype == np.float16 and cfg.accumulate_fp32:
+        need = n * n * (2 * cfg.item_bytes + 3 * cfg.acc_dtype.itemsize)
+    else:
+        need = 3 * n * n * cfg.item_bytes
     return need <= backend.free_compute_bytes() * cfg.vram_fraction
 
 
