@@ -131,6 +131,11 @@ def evaluate(ev: EvalConfig) -> dict:
         exact_lat.append(sec)
         exact_vram.append(peak)
 
+    # exact baseline the dominance gate compares every strategy against: mean
+    # latency and worst-case VRAM, measured on the identical couples.
+    exact_latency = float(np.mean(exact_lat))
+    exact_peak_vram = float(np.max(exact_vram))
+
     # ---- smart computing: one entry per transform -------------------------
     results = {}
     for name in names:
@@ -150,7 +155,20 @@ def evaluate(ev: EvalConfig) -> dict:
         acc = float(np.mean(accs))
         latency = float(np.mean(lats))
         peak_vram = float(np.max(vrams))          # worst-case memory pick
-        sc = metrics.score(acc, peak_vram, latency, ev.accuracy_floor, ev.vram_unit)
+
+        # The improvement rule (BENCHMARKS.md): a strategy is admitted only if
+        # accuracy clears the floor AND it dominates the exact baseline on every
+        # cost axis. The raw performance figure is kept for transparency, but the
+        # ranking ``score`` is zero for anything that is not an improvement — an
+        # accurate-but-slower or heavier strategy does not beat exact.
+        gated = acc < ev.accuracy_floor
+        cost_dominant = metrics.dominates_exact(
+            latency, peak_vram, flop_ratio, exact_latency, exact_peak_vram
+        )
+        improvement = (not gated) and cost_dominant
+        perf_score = metrics.score(
+            acc, peak_vram, latency, ev.accuracy_floor, ev.vram_unit
+        )
         results[name] = {
             "accuracy": acc,
             "rel_frobenius_error": 1.0 - acc if acc < 1.0 else 0.0,
@@ -158,8 +176,13 @@ def evaluate(ev: EvalConfig) -> dict:
             "peak_vram_bytes": peak_vram,
             "peak_vram_mib": peak_vram / metrics.MIB,
             "flop_ratio_vs_exact": flop_ratio,
-            "gated": acc < ev.accuracy_floor,
-            "score": sc,
+            "faster_than_exact": latency < exact_latency,
+            "less_vram_than_exact": peak_vram < exact_peak_vram,
+            "fewer_flops_than_exact": (flop_ratio or 0.0) > 1.0,
+            "gated": gated,
+            "improvement": improvement,
+            "perf_score": perf_score,
+            "score": perf_score if improvement else 0.0,
         }
 
     ranking = sorted(results.items(), key=lambda kv: kv[1]["score"], reverse=True)
@@ -236,8 +259,18 @@ def _print_report(out: dict) -> None:
     print("  " + "-" * (len(header) - 2))
     for name in out["ranking"]:
         r = out["transforms"][name]
-        gated = "  (gated: low accuracy)" if r["gated"] else ""
+        if r["gated"]:
+            note = "  (gated: low accuracy)"
+        elif not r["improvement"]:
+            regressed = [ax for ax, ok in (
+                ("latency", r["faster_than_exact"]),
+                ("VRAM", r["less_vram_than_exact"]),
+                ("FLOPs", r["fewer_flops_than_exact"]),
+            ) if not ok]
+            note = f"  (not an improvement: {', '.join(regressed)} ≥ exact)"
+        else:
+            note = "  (improvement)"
         print(f"  {name:<10}{r['accuracy']:>10.4f}"
               f"{r['latency_s']*1e3:>11.2f}ms{r['peak_vram_mib']:>9.1f}MiB"
-              f"{r['flop_ratio_vs_exact']:>7.1f}x{r['score']:>13.4g}{gated}")
+              f"{r['flop_ratio_vs_exact']:>7.1f}x{r['score']:>13.4g}{note}")
     print(f"  best (highest score): {out['best']}")
