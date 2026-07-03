@@ -50,8 +50,8 @@ class EvalConfig:
     verbose      : print the report.
     """
 
-    n: int = 1024
-    pairs: int = 100
+    n: int = 12000
+    pairs: int = 3
     dtype: str = "fp32"
     rank_m: int | None = None
     fill: str = "random"          # full-rank by default (the honest, general case)

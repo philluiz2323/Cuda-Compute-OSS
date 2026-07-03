@@ -15,11 +15,11 @@ measured the same way for everyone.
 - **Smart (approximate)** strategies — where you contribute: [`strategy/`](strategy/)
 - **The scorer** — one honest number per strategy: [`eval/`](eval/)
 
-Reference setup: **`1024 × 1024`** matrices, **full-rank** (random) data, on an
-**RTX 4060 / 5060 (8 GB)** GPU via PyTorch.
+Reference setup: **`12000 × 12000`** matrices, **full-rank** (random) data, on an
+**A100 (80 GB)** GPU via PyTorch.
 
 ```bash
-python -m eval --n 1024 --pairs 100        # full-rank is the default
+python -m eval --n 12000 --pairs 3        # full-rank is the default
 ```
 
 ---
@@ -57,7 +57,7 @@ which is the part you innovate on.
  A,B ──[ transform → basis Q ]──▶ compress (N,N)→(M,M) ──▶ multiply (M,M) ──▶ reconstruct (N,N) ≈ C
 ```
 
-> **The bar is deliberately hard.** The reference regime is **full-rank** `1024`
+> **The bar is deliberately hard.** The reference regime is **full-rank** `12000`
 > data — the general case, with no low-rank structure to exploit. A subspace of
 > `M ≪ N` cannot capture a full-rank product, so the reference subspace strategy
 > **does not beat exact here** (its accuracy collapses below any floor). That
@@ -133,21 +133,21 @@ The fast way to a good score is usually a lie. These are rejected on sight:
 ## Quick Start
 
 CCO computes on a **GPU** (CUDA or Apple MPS) via **PyTorch** — there is no CPU
-or CuPy backend. You need a GPU machine (reference: RTX 4060 / 5060, 8 GB).
+or CuPy backend. You need a GPU machine (reference: A100, 80 GB).
 
 ```bash
 # 1. install (NumPy + PyTorch — see requirements.txt)
 pip install -r requirements.txt
 
-# 2. see the exact baseline work (n defaults to 1024)
-python -m matmul --n 1024 --verify
+# 2. see the exact baseline work (n defaults to 12000)
+python -m matmul --n 12000 --verify
 
 # 3. run a smart strategy
-python -m strategy --n 1024 --transform rsvd --verify
+python -m strategy --n 12000 --transform rsvd --verify
 
-# 4. self-score all strategies on the reference regime: 1024, full-rank
+# 4. self-score all strategies on the reference regime: 12000, full-rank
 #    (this is what you paste in a PR)
-python -m eval --n 1024 --pairs 100
+python -m eval --n 12000 --pairs 3
 
 # 5. run the tests (they skip if no GPU is present)
 python tests/test_correctness.py

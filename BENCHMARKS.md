@@ -1,7 +1,7 @@
 # Benchmarks
 
-Reference setup: **`1024 × 1024`** matrices, **full-rank** (random) data, `fp32`,
-on an **RTX 4060 / 5060 (8 GB)** GPU via PyTorch. This is the default the scorer
+Reference setup: **`12000 × 12000`** matrices, **full-rank** (random) data, `fp32`,
+on an **A100 (80 GB)** GPU via PyTorch. This is the default the scorer
 runs, and the hardest, most honest case — there is no low-rank structure to
 exploit.
 
@@ -52,7 +52,7 @@ score = accuracy × (1 / Peak_VRAM) × (1 / Latency)     # 0 if accuracy < floor
 Reproduce the reference comparison on your GPU with:
 
 ```bash
-python -m eval --n 1024 --pairs 100 --transforms rsvd \
+python -m eval --n 12000 --pairs 3 --transforms rsvd \
                --rank-m 128 --sweep 512,1024,2048
 ```
 
@@ -61,8 +61,8 @@ python -m eval --n 1024 --pairs 100 --transforms rsvd \
 ## general vs. suggested — the comparison
 
 The comparison is always **per regime** (dtype, matrix content, size), measured
-on your GPU. The reference regime is `N=1024`, 100 couples, `fp32`, **full-rank**
-(random) data, subspace `M = N//8 = 128`:
+on your GPU. The reference regime is `N=12000`, 3 couples, `fp32`, **full-rank**
+(random) data, subspace `M = N//8 = 1500`:
 
 | aspect              | general (exact) | suggested (rsvd) | suggested better? |
 |---------------------|-----------------|------------------|-------------------|
@@ -91,7 +91,7 @@ must be measured on the target GPU and pasted in.
 We express accuracy as **error** (`1 − accuracy`) precisely so all four axes read
 "lower is better" and the rule is a clean dominance check.
 
-**Reading the verdict — full-rank is hard on purpose.** On full-rank `1024` data
+**Reading the verdict — full-rank is hard on purpose.** On full-rank `12000` data
 a subspace of `M ≪ N` cannot represent the product: the error is ~100%, accuracy
 `≈ 0`, and the accuracy floor forces the **score to 0**. Fewer FLOPs do not help
 when the answer is wrong. So on the reference regime the honest result is: **the
@@ -107,7 +107,7 @@ smooth) — then `M ≪ N` captures it and accuracy holds:
 - **Compressible data** (low-rank / smooth) at `M ≪ N` — accuracy holds and
   `O(N²M) ≪ O(N³)`. Show it explicitly:
   ```bash
-  python -m eval --n 1024 --pairs 100 --fill lowrank --data-rank 16 --transforms rsvd
+  python -m eval --n 12000 --pairs 3 --fill lowrank --data-rank 16 --transforms rsvd
   ```
 - **out-of-core scale** — where the exact `O(N³)` product does not fit in GPU
   memory at all, so a smaller subspace multiply is the *only* thing that runs.
@@ -148,12 +148,12 @@ they are not asserted here.
 All of this runs on a GPU (CUDA/MPS) via PyTorch.
 
 ```bash
-# the reference comparison on this page (1024, full-rank)
-python -m eval --n 1024 --pairs 100 --transforms rsvd \
+# the reference comparison on this page (12000, full-rank)
+python -m eval --n 12000 --pairs 3 --transforms rsvd \
                --rank-m 128 --sweep 512,1024,2048
 
 # machine-readable numbers (for a PR scorecard)
-python -m eval --n 1024 --pairs 100 --transforms rsvd --json
+python -m eval --n 12000 --pairs 3 --transforms rsvd --json
 
 # the correctness gates (skip if no GPU is present)
 python tests/test_correctness.py

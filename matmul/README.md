@@ -22,8 +22,8 @@ The rest of this file documents the **normal (exact)** method in `matmul/`. For
 the smart method, see [strategy/README.md](../strategy/README.md).
 
 ```bash
-python -m matmul   --n 1024 --verify                       # exact
-python -m strategy --n 1024 --transform rsvd --verify   # smart
+python -m matmul   --n 12000 --verify                      # exact
+python -m strategy --n 12000 --transform rsvd --verify  # smart
 ```
 
 ## The core problem: it doesn't fit
@@ -37,9 +37,9 @@ A square matrix in FP32 costs `n² × 4` bytes. You need three of them (A, B, C)
 | 32k | 4 GB | 12 GB | 70 TFLOP |
 | 128k | **65 GB** | **196 GB** | 4.2 PFLOP |
 
-An RTX 4060 / 5060 has **8 GB**. Small sizes (the default `n = 1024` is 12 MB
+An A100 has **80 GB**. Small sizes (the default `n = 12000` is ~1.7 GB
 for A+B+C) run **in-core** in a single GPU GEMM. Larger ones don't fit — already
-at `n = 32k`, A+B+C is 12 GB — so this system streams them. It:
+at `n = 128k`, A+B+C is 196 GB — so this system streams them. It:
 
 1. Stores A, B, C as **memory-mapped files on disk** (never fully in RAM).
 2. Streams **T × T tiles** to the GPU and computes
@@ -72,8 +72,8 @@ batch of one) via `Backend.matmul`; the smart engine uses `torch.matmul`.
 ## Use it — CLI
 
 ```bash
-# Small, checked against a float64 reference (n defaults to 1024):
-python -m matmul --n 1024 --dtype fp32 --verify
+# Default size, checked against a float64 reference (n defaults to 12000):
+python -m matmul --n 12000 --dtype fp32 --verify
 
 # Benchmark a size that fits on the GPU:
 python -m matmul --n 20000 --dtype fp16

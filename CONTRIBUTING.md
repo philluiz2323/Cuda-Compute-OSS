@@ -64,22 +64,22 @@ them with the **normal (exact)** engine and your **smart** strategy on the
 *identical* inputs, and prints one scorecard.
 
 CCO computes on a **GPU** (CUDA/MPS) via PyTorch — score on a GPU machine
-(reference: RTX 4060 / 5060). The reference regime is **`1024`, full-rank**
+(reference: A100). The reference regime is **`12000`, full-rank**
 (random) data, which is `eval`'s default.
 
 ```bash
-# score your transform on the reference regime (1024, full-rank, 100 couples)
-python -m eval --n 1024 --pairs 100 --transforms mine,rsvd
+# score your transform on the reference regime (12000, full-rank, 3 couples)
+python -m eval --n 12000 --pairs 3 --transforms mine,rsvd
 
 # fit the empirical time complexity O(N^p); pass --rank-m to hold M fixed (~N²),
 # omit it to let M = N//8 grow with N (~N³)
 python -m eval --transforms mine --rank-m 128 --sweep 512,1024,2048
 
 # machine-readable, for pasting exact numbers
-python -m eval --n 1024 --pairs 100 --transforms mine --json
+python -m eval --n 12000 --pairs 3 --transforms mine --json
 
 # if your strategy targets compressible data, show that regime too (and say so):
-python -m eval --n 1024 --pairs 100 --fill lowrank --data-rank 16 --transforms mine
+python -m eval --n 12000 --pairs 3 --fill lowrank --data-rank 16 --transforms mine
 ```
 
 Then confirm you did not break the gates:
@@ -119,7 +119,7 @@ Every PR description must be exactly this shape:
 
 <what the strategy does, why it is cheaper, and the regime it targets>
 
-## Result   (N=1024, full-rank, RTX 4060/5060, fp32)
+## Result   (N=12000, full-rank, A100 (80 GB), fp32)
 
 | metric          | value          |
 |-----------------|----------------|

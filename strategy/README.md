@@ -61,17 +61,17 @@ C = subspace_matmul(A, B, config=Config(transform="mine", rank_m=256))
 CLI:
 
 ```bash
-# full-rank 1024 (the honest hard case): reconstruction error is large by design.
-python -m strategy --n 1024 --transform rsvd --fill random --verify
+# full-rank 12000 (the honest hard case): reconstruction error is large by design.
+python -m strategy --n 12000 --transform rsvd --fill random --verify
 
 # smart multiply on compressible data (where it works), report error:
-python -m strategy --n 1024 --transform rsvd --fill lowrank --data-rank 16 --verify
+python -m strategy --n 12000 --transform rsvd --fill lowrank --data-rank 16 --verify
 
 # normal (exact) vs smart, side by side on the same inputs:
-python -m strategy --n 1024 --compare --transform rsvd --fill lowrank --data-rank 16
+python -m strategy --n 12000 --compare --transform rsvd --fill lowrank --data-rank 16
 ```
 
-(`M` defaults to `n // 8` = 128 at `n = 1024`; set it with `--rank-m`.)
+(`M` defaults to `n // 8` = 1500 at `n = 12000`; set it with `--rank-m`.)
 
 Key flags: `--n`, `--dtype {fp16,fp32,fp64}`, `--rank-m M`, `--transform`,
 `--compare`, `--fill {lowrank,random,iota,zeros}`, `--data-rank`, `--storage`,
