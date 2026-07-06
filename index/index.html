@@ -86,6 +86,12 @@
   .hero-cta{display:flex;gap:14px;flex-wrap:wrap}
   .hero-note{margin-top:20px;font-size:13.5px;color:var(--muted-2);display:flex;align-items:center;gap:8px}
   .hero-note .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(72,213,151,.16)}
+  .hero-callout{
+    margin-top:18px;max-width:640px;padding:16px 18px;border-radius:14px;
+    border:1px solid rgba(55,211,224,.28);background:rgba(55,211,224,.08);
+    color:var(--ink);font-size:14.5px;
+  }
+  .hero-callout b{color:var(--accent-2)}
 
   /* code card */
   .code-card{
@@ -165,6 +171,13 @@
   .tl-body p{font-size:15px;color:var(--muted)}
   .tl-tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
   .tag{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted)}
+  .notice{
+    background:linear-gradient(180deg,rgba(79,140,245,.08),rgba(55,211,224,.06));
+    border:1px solid var(--line-strong);border-radius:var(--radius);padding:26px 28px;
+  }
+  .notice h3{font-size:20px;margin-bottom:10px}
+  .notice p{font-size:15.5px;color:var(--muted)}
+  .notice-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
 
   /* ---------- Pricing ---------- */
   .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
@@ -238,6 +251,7 @@
     <nav class="nav-links">
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
+      <a href="#gittensor">Gittensor</a>
       <a href="#tech">Technology</a>
       <a href="#product">Product</a>
       <a href="#pricing">Pricing</a>
@@ -261,6 +275,7 @@
       <div class="eyebrow">Sub-quadratic attention · Drop-in GPU kernels</div>
       <h1>Break the <span class="grad">O(n²)</span> wall in Transformer LLMs.</h1>
       <p class="lead">CCO delivers open-source, hardware-validated attention kernels that match standard accuracy while running in sub-quadratic time and memory — as a drop-in library and a commercial API.</p>
+      <div class="hero-callout"><b>Built with help from Gittensor.</b> Gittensor helps power this project, and this repository and website are the public places to understand the work, follow progress, and contribute through GitHub.</div>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#pricing">Get API access
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -287,6 +302,21 @@
 
 <span class="c-key">assert</span> <span class="c-fn">mse</span>(attn, ground_truth) &lt; <span class="c-str">1e-3</span>   <span class="c-com"># same output</span>
 <span class="c-com"># 128K ctx · ~18% lower inference cost · same GPU</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GITTENSOR ============ -->
+<section class="sec" id="gittensor">
+  <div class="wrap">
+    <div class="notice reveal">
+      <div class="eyebrow">Gittensor</div>
+      <h3>Gittensor helps power the work behind CCO.</h3>
+      <p>You should not need Discord context or prior knowledge of SN74 to understand where the project comes from. The short version is that Gittensor is part of the network and support structure helping this software get built, while this repository remains the public source of truth for the code, benchmarks, documentation, and pull requests.</p>
+      <div class="notice-links">
+        <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS">View GitHub repo</a>
+        <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Read CONTRIBUTING.md</a>
+      </div>
     </div>
   </div>
 </section>
@@ -341,7 +371,7 @@
       <div class="step reveal">
         <div class="num">01</div>
         <h3>Contributors compete</h3>
-        <p>Engineers submit open-source sub-quadratic attention kernels each cycle, on randomly seeded inputs.</p>
+        <p>Engineers submit open-source sub-quadratic attention kernels each cycle, on randomly seeded inputs, through the public GitHub repository.</p>
         <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
       <div class="step reveal" style="transition-delay:.06s">
@@ -359,7 +389,7 @@
       <div class="step reveal" style="transition-delay:.18s">
         <div class="num">04</div>
         <h3>Revenue reinvests</h3>
-        <p>Enterprises pay to use the champion via API; a share funds a bigger prize pool — and better kernels.</p>
+        <p>Enterprises pay to use the champion via API; a share funds a bigger prize pool — and better kernels. Gittensor helps power the surrounding ecosystem that makes this work possible.</p>
       </div>
     </div>
   </div>
@@ -569,6 +599,7 @@
       <div class="foot-brand">
         <a class="brand" href="#top"><span class="logo">C</span> CCO</a>
         <p>Cuda-Compute-OSS — open-source, hardware-validated sub-quadratic attention kernels for Transformer LLMs.</p>
+        <p style="margin-top:10px">Built with help from Gittensor and developed in public on GitHub.</p>
       </div>
       <div>
         <h4>Platform</h4>
@@ -599,7 +630,7 @@
     </div>
     <div class="foot-bottom">
       <span>© 2026 CCO (Cuda-Compute-OSS). All rights reserved.</span>
-      <span>Built from the CCO whitepaper · Draft v0.1</span>
+      <span>Built from the CCO whitepaper · Gittensor-powered project · Draft v0.1</span>
     </div>
     <p class="disclaimer">This site presents a working draft product concept. Technical parameters (MSE thresholds, sequence lengths, scoring weights, revenue-reinvestment ratios) are subject to revision based on testnet results and feedback. Nothing herein constitutes financial advice. Replace the placeholder contact details (e.g. hello@example.com) with your own before launch.</p>
   </div>

@@ -5,6 +5,18 @@ less compute cost without losing accuracy, proves it with the shared scorer, and
 opens a PR. This document is the whole loop — **the one rule**, **self-score
 locally**, **submit**.
 
+## Where Gittensor Fits
+
+This repository is part of work being built with help from **Gittensor**. That
+relationship should be understandable from GitHub alone:
+
+- Gittensor helps power the project and gives the work a broader network context.
+- This GitHub repository is still the public source of truth for code, docs,
+  benchmarks, and pull requests.
+- If you want to contribute, you do not need to be in Discord or already know
+  SN74. You can participate directly here by reading the docs, running the
+  scorer, and opening a PR.
+
 ---
 
 ## The one rule
@@ -109,6 +121,10 @@ Rules for an honest local score:
 4. **Open the PR** and fill in the scorecard. The PR template
    ([`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md))
    pre-populates the exact format below — **the numbers, not the prose, decide.**
+
+If you are coming in through Gittensor, contribute through the same GitHub path
+as everyone else: code in a branch, benchmark locally, and submit a PR with
+reproducible numbers.
 
 ### PR description format
 

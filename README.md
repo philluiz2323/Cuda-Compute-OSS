@@ -11,6 +11,19 @@ compute it for **less compute cost** — lower latency, lower VRAM, lower
 time-complexity — **without giving up accuracy**, and to have that claim
 measured the same way for everyone.
 
+## Gittensor
+
+CCO is being built in the open with help from **Gittensor**. If you found this
+repository through GitHub alone, the important point is simple: Gittensor helps
+power the work behind this project, and this repository is where that work is
+made public, reviewed, benchmarked, and contributed to.
+
+If you want to get involved, start here in the repo:
+
+- read the project rules in this README
+- read [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution path
+- submit transforms, benchmarks, fixes, and documentation improvements through GitHub
+
 - **Normal (exact)** engine — the frontier you must beat: [`matmul/`](matmul/)
 - **Smart (approximate)** strategies — where you contribute: [`strategy/`](strategy/)
 - **The scorer** — one honest number per strategy: [`eval/`](eval/)
@@ -163,6 +176,10 @@ python strategy/tests/test_subspace.py
 
 Start at [CONTRIBUTING.md](CONTRIBUTING.md).
 
+If you are arriving from Gittensor and want the fastest route to participation,
+the contribution loop is: implement a change, run `python -m eval ...`, and
+open a PR with the scorecard.
+
 ## Repository Layout
 
 ```
@@ -188,4 +205,3 @@ Each of `matmul/`, `strategy/`, `eval/` is standalone and has its own README.
 ## License
 
 CCO is released under the [MIT License](LICENSE). © 2026 CCO contributors.
-
