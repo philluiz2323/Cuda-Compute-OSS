@@ -209,8 +209,10 @@ disagreeing with the prose.
 The PR bot runs continuously for non-GPU triage. On each PR event and on a
 15-minute schedule it checks drafts, blocked contributors, copycat overlap, and
 scorecard presence. PRs that pass those gates get `status:queued-gpu` and appear
-in `dashboard/data.json` in oldest-PR-first order. The dashboard UI itself is
-expected to live in a separate private repository.
+in `dashboard/data.json` on the `bot/dashboard-state` branch in oldest-PR-first
+order. The dashboard UI itself is expected to live in a separate private
+repository, so `main` stays protected while the bot publishes queue/result data
+to that dedicated state branch.
 
 GPU evaluation is intentionally batched. The bot can run all day, but GPU tests
 should run sequentially during one or two maintainer-controlled windows per day.
@@ -220,12 +222,14 @@ be tested next.
 Maintainers can preview the next GPU batch without renting hardware:
 
 ```bash
+git show origin/bot/dashboard-state:dashboard/data.json > dashboard/data.json
 uv run --extra test python -m eval.gpu_batch --limit 3
 ```
 
 When a GPU is available, run the same queue sequentially:
 
 ```bash
+git show origin/bot/dashboard-state:dashboard/data.json > dashboard/data.json
 uv run --extra test python -m eval.gpu_batch --limit 3 --run --clean
 ```
 

@@ -39,8 +39,11 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  STATE_BRANCH: bot/dashboard-state
+
 concurrency:
-  group: gpu-batch-evaluation
+  group: bot-state-pipeline
   cancel-in-progress: false
 
 jobs:
@@ -57,6 +60,26 @@ jobs:
 
       - name: Install uv
         run: python -m pip install --upgrade uv
+
+      - name: Restore queue and prior result state from bot branch
+        run: |
+          set -euo pipefail
+          if ! git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            echo "State branch $STATE_BRANCH does not exist yet."
+            exit 0
+          fi
+          git fetch --depth=1 origin "$STATE_BRANCH"
+          restore_file() {
+            local src="$1"
+            local dst="$2"
+            if git cat-file -e "origin/$STATE_BRANCH:$src" 2>/dev/null; then
+              mkdir -p "$(dirname "$dst")"
+              git show "origin/$STATE_BRANCH:$src" > "$dst"
+            fi
+          }
+          restore_file dashboard/data.json dashboard/data.json
+          restore_file eval/ledger.jsonl eval/ledger.jsonl
+          restore_file dashboard/results.json dashboard/results.json
 
       - name: Run queued PRs sequentially
         env:
@@ -112,14 +135,32 @@ jobs:
             --repo "${{ github.repository }}" \
             "${args[@]}"
 
-      - name: Commit ledger and dashboard result data if changed
+      - name: Publish ledger and dashboard results to bot branch
         run: |
+          set -euo pipefail
           if git diff --quiet -- eval/ledger.jsonl dashboard/results.json; then
             echo "No result data changes."
+            exit 0
+          fi
+          tmpdir="$(mktemp -d)"
+          cp eval/ledger.jsonl "$tmpdir/ledger.jsonl"
+          cp dashboard/results.json "$tmpdir/results.json"
+          git restore eval/ledger.jsonl dashboard/results.json
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git fetch --depth=1 origin "$STATE_BRANCH"
+            git switch -C "$STATE_BRANCH" "origin/$STATE_BRANCH"
+          else
+            git switch -c "$STATE_BRANCH"
+          fi
+          mkdir -p eval dashboard
+          cp "$tmpdir/ledger.jsonl" eval/ledger.jsonl
+          cp "$tmpdir/results.json" dashboard/results.json
+          if git diff --quiet -- eval/ledger.jsonl dashboard/results.json; then
+            echo "State branch already up to date."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add eval/ledger.jsonl dashboard/results.json
           git commit -m "dashboard: update verified eval results"
-          git push
+          git push origin HEAD:"$STATE_BRANCH"

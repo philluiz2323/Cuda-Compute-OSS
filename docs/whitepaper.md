@@ -268,11 +268,11 @@ ledger** (`ledger.jsonl`): `(date, PR, author, commit, track, seed, accuracy,
 latency, peak VRAM, FLOP ratio, verdict)` — auditable line-by-line against the
 per-run logs. Nothing on the frontier is ever edited in place.
 
-A public **dashboard** (fed by `dashboard/data.json`) renders the
-ledger: the current frontier per track, the exact-baseline anchor, and the
-**optimization journey** — one point per merged frontier PR, from the baseline
-to the current best. The chart is the project's progress report; if the curve
-doesn't move, nothing is claimed.
+A public **dashboard** (fed by `dashboard/data.json` on the
+`bot/dashboard-state` branch) renders the ledger: the current frontier per
+track, the exact-baseline anchor, and the **optimization journey** — one point
+per merged frontier PR, from the baseline to the current best. The chart is the
+project's progress report; if the curve doesn't move, nothing is claimed.
 
 ### 6.4 Reproduce it yourself
 
