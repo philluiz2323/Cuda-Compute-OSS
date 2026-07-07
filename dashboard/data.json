@@ -66,8 +66,34 @@
       "state": "non_gpu_review",
       "title": "fix(storage): thread seed through iota fill so eval couples differ (#104)",
       "url": "https://github.com/zeokin/Cuda-Compute-OSS/pull/113"
+    },
+    {
+      "author": "kaozyn",
+      "detail": "gate chain passed; GPU eval runner is not wired up yet in this repo (Phase 2)",
+      "gpu_required": true,
+      "head_sha": "60418fe1fa31a6e70a04be3dde1575203c2c031a",
+      "kind": "feat",
+      "label": "status:queued-gpu",
+      "pr": 114,
+      "state": "eval_pending",
+      "title": "feat: allow targeted strategy smoke checks",
+      "url": "https://github.com/zeokin/Cuda-Compute-OSS/pull/114"
     }
   ],
-  "queue": [],
-  "updated": "2026-07-07T14:29:43+00:00"
+  "queue": [
+    {
+      "author": "kaozyn",
+      "detail": "gate chain passed; GPU eval runner is not wired up yet in this repo (Phase 2)",
+      "gpu_required": true,
+      "head_sha": "60418fe1fa31a6e70a04be3dde1575203c2c031a",
+      "kind": "feat",
+      "label": "status:queued-gpu",
+      "position": 1,
+      "pr": 114,
+      "state": "eval_pending",
+      "title": "feat: allow targeted strategy smoke checks",
+      "url": "https://github.com/zeokin/Cuda-Compute-OSS/pull/114"
+    }
+  ],
+  "updated": "2026-07-07T14:40:16+00:00"
 }
