@@ -3,10 +3,14 @@
 # `labels-sync.yml` reads this file and reconciles the repo's labels with it
 # (create missing, recolor/redescribe drifted). Edit here, not in the GitHub UI.
 #
-# Three families:
+# Five families:
 #   area:*   subsystem the issue/PR touches (auto-applied from changed paths)
 #   type:*   what kind of contribution it is (auto-applied from title/template)
 #   status:* review/triage state (applied by maintainers or the eval bot)
+#   eval:*   deterministic PR verdict from eval.label / eval.pr_bot -- the
+#            tier a merged PR is paid on (docs/sn74-emission-strategy.md's
+#            target Gittensor label_multipliers use these exact names)
+#   (ungrouped) copycat enforcement + governance labels (eval.copycat_guard)
 
 # ── area: subsystems ────────────────────────────────────────────────────────
 - name: "area:strategy"
@@ -58,3 +62,48 @@
 - name: "status:triage"
   color: "C5DEF5"
   description: "Newly opened, not yet triaged"
+
+# ── eval: deterministic verdict tiers ───────────────────────────────────────
+- name: "eval:XL"
+  color: "0B6E4F"
+  description: "Verified frontier improvement, largest tier (>=50% over the reference anchor)"
+- name: "eval:L"
+  color: "1B998B"
+  description: "Verified frontier improvement, large tier (>=25%)"
+- name: "eval:M"
+  color: "2D9CDB"
+  description: "Verified frontier improvement, medium tier (>=10%)"
+- name: "eval:S"
+  color: "56CCF2"
+  description: "Verified frontier improvement, small tier (>=5%)"
+- name: "eval:XS"
+  color: "BDE0FE"
+  description: "Verified frontier improvement, smallest tier (>=2%, the significance floor)"
+- name: "eval:BASELINE"
+  color: "6C63FF"
+  description: "First admitted strategy on this track"
+- name: "eval:none"
+  color: "D9D9D9"
+  description: "Correct, but does not dominate exact on every cost axis (or gain too small to count)"
+- name: "eval:REJECT"
+  color: "B60205"
+  description: "Accuracy below the floor -- fast and wrong is not an improvement"
+
+# ── copycat enforcement (eval.copycat_guard, eval.pr_bot) ──────────────────
+- name: "copycat"
+  color: "5C0011"
+  description: "Blocked: substantially reproduces an earlier PR (see .github/COPYCATS.md)"
+- name: "copycat-warn"
+  color: "D93F0B"
+  description: "Flagged for maintainer review: significant overlap with an earlier PR"
+- name: "flagged:gaming"
+  color: "000000"
+  description: "Account blocked for gaming the scoring pipeline (see .github/FLAGGED.md)"
+
+# ── mult: non-eval contribution multipliers (docs/sn74-emission-strategy.md) ─
+- name: "mult:harness"
+  color: "0052CC"
+  description: "Improves the eval/scoring harness itself (maintainer-reviewed)"
+- name: "mult:docs"
+  color: "0E8A16"
+  description: "Documentation contribution, scored at a fixed low multiplier"

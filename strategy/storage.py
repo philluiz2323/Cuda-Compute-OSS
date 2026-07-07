@@ -53,6 +53,27 @@ def _fill_lowrank(mat: np.ndarray, seed: int, rank: int) -> None:
         mat.flush()
 
 
+def _fill_decaying_spectrum(mat: np.ndarray, seed: int, rank: int, alpha: float = 1.0) -> None:
+    """Fill with a rank-``rank`` matrix whose component weights decay as
+    k^-alpha (k=1..rank), unlike _fill_lowrank's uniform weighting. Most of
+    the energy sits in the first few components with a long, genuinely small
+    (not zero) tail -- tests whether a transform prioritizes the strongest
+    structure rather than needing the full rank to be accurate."""
+    n = mat.shape[0]
+    rng = np.random.default_rng(seed)
+    scale = 1.0 / np.sqrt(rank)
+    V = (rng.standard_normal((rank, n)) * scale).astype(np.float64)
+    weights = np.arange(1, rank + 1, dtype=np.float64) ** -alpha
+    V *= weights[:, None]
+    block = max(1, min(n, (256 * 1024**2) // (n * 8)))
+    for r0 in range(0, n, block):
+        r1 = min(n, r0 + block)
+        U = rng.standard_normal((r1 - r0, rank))
+        mat[r0:r1, :] = (U @ V).astype(mat.dtype, copy=False)
+    if isinstance(mat, np.memmap):
+        mat.flush()
+
+
 def allocate(n: int, dtype, on_disk: bool, path: str | None) -> np.ndarray:
     """Create an uninitialised n x n matrix, on disk or in RAM."""
     if on_disk:
@@ -75,6 +96,7 @@ def generate(
     fill: str = "random",
     scale: float = 1.0,
     data_rank: int | None = None,
+    spectral_alpha: float = 1.0,
 ) -> np.ndarray:
     mat = allocate(n, dtype, on_disk, path)
     if fill == "random":
@@ -86,6 +108,9 @@ def generate(
     elif fill == "lowrank":
         r = data_rank or max(1, n // 32)
         _fill_lowrank(mat, seed, min(r, n))
+    elif fill == "decaying-spectrum":
+        r = data_rank or max(1, n // 32)
+        _fill_decaying_spectrum(mat, seed, min(r, n), spectral_alpha)
     else:
         raise ValueError(f"unknown fill {fill!r}")
     return mat

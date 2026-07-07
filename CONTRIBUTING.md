@@ -64,12 +64,38 @@ register_transform("mine", MyTransform)
 ```
 
 That is enough to be scored: `--transform mine`. Bigger contributions (a new
-compression scheme, a better exact tile schedule in `matmul/`, a sharper metric
-in `eval/`) are welcome too — the same one rule and the same scorecard apply.
+compression scheme, a better exact tile schedule in `matmul/`) are welcome too
+— the same one rule and the same scorecard apply.
+
+---
+
+## What's open, what's protected
+
+| zone | paths | policy |
+|---|---|---|
+| **Open — the main event** | [`strategy/transforms.py`](strategy/transforms.py) (new `Transform` classes), new strategy modules under `strategy/` | The designed hook — `register_transform()` exists for exactly this. Self-scored, verified by the scorer below. |
+| **Open — engine performance** | [`matmul/`](matmul/), `strategy/backend.py`, `strategy/subspace.py` | Tiling, streaming, dtype/precision paths, platform fixes — all welcome, measured the same way. |
+| **Open — accompanying** | `tests/`, `strategy/tests/`, `examples/` | Welcome alongside a code change. Test-only PRs score `0` by design — they don't demonstrate a cost improvement. |
+| **Protected — maintainer-owned** | [`eval/`](eval/) (the scorer, the bot, the ledger), [`docs/`](docs/), [`.github/`](.github/), `dashboard/data.json` | The scoring machinery itself. See [`.github/CODEOWNERS`](.github/CODEOWNERS) — a PR touching these paths is held for maintainer review regardless of what else it does. Changing the scorer is not how you win on it. |
+
+Not sure which zone a change falls into? Open the PR anyway — CODEOWNERS
+review routes it correctly.
 
 ---
 
 ## Self-score locally
+
+**Step 0 — a fast, no-GPU sanity check.** Before touching a GPU at all:
+
+```bash
+python -m strategy.smoke
+```
+
+This exercises every registered transform's basis on a tiny matrix (shape,
+orthonormality, no NaN/Inf) in under a second, on any machine — CPU included.
+It's a pre-flight, not a score: passing it proves your transform doesn't
+crash, nothing more. The real scorecard always comes from the GPU commands
+below.
 
 Before you open a PR, run the scorer. It generates random couples, multiplies
 them with the **normal (exact)** engine and your **smart** strategy on the
@@ -121,6 +147,10 @@ Rules for an honest local score:
 4. **Open the PR** and fill in the scorecard. The PR template
    ([`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md))
    pre-populates the exact format below — **the numbers, not the prose, decide.**
+5. **Your own work.** A PR that substantially reproduces an earlier PR's diff
+   is detected automatically and blocked (see
+   [`.github/COPYCATS.md`](.github/COPYCATS.md)) — an independently-arrived-at
+   similar solution is fine, a copy is not.
 
 If you are coming in through Gittensor, contribute through the same GitHub path
 as everyone else: code in a branch, benchmark locally, and submit a PR with
@@ -162,6 +192,15 @@ correctness gates and the one rule, and merges if your strategy is a genuine
 improvement (or a useful strategy that documents its trade-off honestly). If the
 scorecard can't be reproduced, the PR goes back for evidence — not rejected for
 disagreeing with the prose.
+
+**Scoring is moving to automated verdict labels** (`eval:XS` through `eval:XL`,
+plus `eval:BASELINE`, `eval:none`, `eval:REJECT` — see
+[`docs/sn74-emission-strategy.md`](docs/sn74-emission-strategy.md)), assigned
+by a deterministic bot that re-runs your scorecard on a pinned GPU, not by a
+human judgment call. That bot isn't live yet — until it is, a maintainer
+applies the equivalent label by hand from your reproduced scorecard. The
+tiering rule is identical either way, and won't change retroactively once the
+bot starts running.
 
 ---
 

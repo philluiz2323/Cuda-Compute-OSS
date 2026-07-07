@@ -17,7 +17,8 @@ test) plus this folder's metric/memory helpers.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+import secrets
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -40,13 +41,20 @@ class EvalConfig:
     dtype        : element type (fp16 / fp32 / fp64).
     rank_m       : subspace dimension M for the smart strategy (None => min(N, max(64, N//8))).
     fill         : matrix content: 'random' (hard, full-rank), 'lowrank'
-                   (the strategy's happy path), or 'iota'.
-    data_rank    : rank used when fill='lowrank' (None => N//32).
+                   (the strategy's happy path), 'decaying-spectrum' (smoothly
+                   decaying singular values -- tests whether a transform
+                   prioritizes the strongest structure rather than needing
+                   full rank), or 'iota'.
+    data_rank    : rank used when fill='lowrank' or 'decaying-spectrum'
+                   (None => N//32).
     transforms   : transform names to evaluate (None => all registered).
     accuracy_floor: accuracy below this hard-gates the score to 0 (default 0.8;
                     set 0.0 to disable the gate).
     vram_unit    : unit for Peak_VRAM inside the score ('gib'|'mib'|'bytes').
-    seed         : base RNG seed (pair i uses seed+2i, seed+2i+1).
+    seed         : base RNG seed (pair i uses seed+2i, seed+2i+1). None (the
+                   default) draws a fresh unpredictable seed each run --
+                   scoring must never run against a known, fixed input. Pass
+                   an explicit int only to reproduce a specific prior run.
     device       : GPU device index (CUDA). Compute runs on GPU via PyTorch.
     verbose      : print the report.
     """
@@ -60,9 +68,19 @@ class EvalConfig:
     transforms: list[str] | None = None
     accuracy_floor: float = 0.8
     vram_unit: str = "gib"
-    seed: int = 0
+    seed: int | None = None
     device: int = 0
     verbose: bool = True
+
+
+def _resolve_seed(seed: int | None) -> int:
+    """Return ``seed`` unchanged, or draw a fresh unpredictable one.
+
+    A fixed default seed would let a submission memorize the exact test
+    matrices instead of genuinely approximating them -- scoring must always
+    see an input it could not have precomputed for.
+    """
+    return seed if seed is not None else secrets.randbelow(2**31 - 1)
 
 
 def effective_rank_m(ev: EvalConfig) -> int:
@@ -76,6 +94,7 @@ def _strategy_config(ev: EvalConfig, transform: str) -> Config:
         dtype=ev.dtype,
         rank_m=ev.rank_m,
         transform=transform,
+        transform_seed=ev.seed,
         vram_fraction=0.6,
         storage="ram",
         seed=ev.seed,
@@ -112,6 +131,7 @@ def _generate_pairs(ev: EvalConfig):
 
 def evaluate(ev: EvalConfig) -> dict:
     """Run the full evaluation and return a results dict (see module docstring)."""
+    ev = replace(ev, seed=_resolve_seed(ev.seed))
     backend = Backend(ev.device, ev.verbose)
     names = ev.transforms or _transforms.available()
 
@@ -200,7 +220,7 @@ def evaluate(ev: EvalConfig) -> dict:
         "config": {
             "n": ev.n, "pairs": ev.pairs, "dtype": ev.dtype, "rank_m": m,
             "fill": ev.fill, "accuracy_floor": ev.accuracy_floor,
-            "vram_unit": ev.vram_unit, "device": backend.name,
+            "vram_unit": ev.vram_unit, "device": backend.name, "seed": ev.seed,
         },
         "complexity": {
             "normal": "O(N^3)",
@@ -233,7 +253,8 @@ def estimate_scaling(ns, ev: EvalConfig) -> dict:
     name = (ev.transforms or _transforms.available())[0]
     lat_by_n = {}
     for n in ns:
-        sub = EvalConfig(**{**ev.__dict__, "n": n, "pairs": 1, "verbose": False})
+        sub = EvalConfig(**{**ev.__dict__, "n": n, "pairs": 1, "verbose": False,
+                            "seed": _resolve_seed(ev.seed)})
         cfg = _strategy_config(sub, name)
         A, B = _generate_pairs(sub)[0][0]
         Cs = np.empty((n, n), dtype=A.dtype)
@@ -258,7 +279,7 @@ def estimate_scaling(ns, ev: EvalConfig) -> dict:
 def _print_report(out: dict) -> None:
     c = out["config"]
     print(f"\n=== eval report (n={c['n']}, {c['pairs']} couples, {c['dtype']}, "
-          f"fill={c['fill']}, M={c['rank_m']}) ===")
+          f"fill={c['fill']}, M={c['rank_m']}, seed={c['seed']}) ===")
     print(f"  complexity : normal {out['complexity']['normal']}   "
           f"smart {out['complexity']['smart']}")
     print(f"  exact      : {out['exact']['latency_s']*1e3:8.2f} ms   "

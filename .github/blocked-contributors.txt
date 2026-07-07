@@ -1,0 +1,7 @@
+# GitHub logins blocked from earning any score on this repo -- one per line,
+# `#` starts a comment. Read by eval.pr_bot.load_blocked_contributors() on
+# every gate-chain run. Additions are logged with a reason in FLAGGED.md;
+# see COPYCATS.md for how an account lands here via copycat enforcement.
+#
+# Empty by design until the first real strike -- do not seed this
+# speculatively.

@@ -5,7 +5,7 @@ Run:  python tests/test_host_memory.py
 import ctypes
 import os
 import sys
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -43,11 +43,17 @@ def test_windows_global_memory_status_ex():
         stat.ullAvailPhys = 24 * 1024**3
         return 1
 
+    # ctypes.windll only exists on actual Windows -- patch(..., create=True)
+    # on the whole attribute (not a nested path under it) so this test can
+    # run and mean something on the Linux/macOS CI box that actually runs it.
+    fake_windll = MagicMock()
+    fake_windll.kernel32.GlobalMemoryStatusEx = fake_gms
+
     with patch("matmul.backend.sys.platform", "win32"), patch(
         "strategy.backend.sys.platform", "win32"
     ), patch("matmul.backend.os.sysconf", side_effect=OSError("no sysconf"), create=True), patch(
         "strategy.backend.os.sysconf", side_effect=OSError("no sysconf"), create=True
-    ), patch("ctypes.windll.kernel32.GlobalMemoryStatusEx", fake_gms):
+    ), patch("ctypes.windll", fake_windll, create=True):
         assert matmul_host_bytes() == 24 * 1024**3
         assert strategy_host_bytes() == 24 * 1024**3
 

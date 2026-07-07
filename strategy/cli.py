@@ -31,7 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
                         "report speed + accuracy")
     p.add_argument("--storage", choices=["auto", "ram", "disk"], default="auto")
     p.add_argument("--workdir", default="./_strategy_data")
-    p.add_argument("--fill", choices=["lowrank", "random", "iota", "zeros"],
+    p.add_argument("--fill", choices=["lowrank", "random", "decaying-spectrum", "iota", "zeros"],
                    default="lowrank",
                    help="test-matrix content. 'lowrank' = compressible data "
                         "where the strategy is accurate (default)")

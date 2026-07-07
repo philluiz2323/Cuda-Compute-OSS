@@ -27,6 +27,7 @@ If you want to get involved, start here in the repo:
 - **Normal (exact)** engine — the frontier you must beat: [`matmul/`](matmul/)
 - **Smart (approximate)** strategies — where you contribute: [`strategy/`](strategy/)
 - **The scorer** — one honest number per strategy: [`eval/`](eval/)
+- **The whitepaper** — the full vision, roadmap, and how Gittensor rewards work: [`docs/whitepaper.md`](docs/whitepaper.md)
 - **Landing page** — the project overview site: [zeokin.github.io/Cuda-Compute-OSS](https://zeokin.github.io/Cuda-Compute-OSS/index/index.html)
 
 Reference setup: **`12000 × 12000`** matrices, **full-rank** (random) data, on an
@@ -158,17 +159,20 @@ or CuPy backend. You need a GPU machine (reference: A100, 80 GB).
 # 1. install (NumPy + PyTorch — see requirements.txt)
 pip install -r requirements.txt
 
-# 2. see the exact baseline work (n defaults to 12000)
+# 2. fast, no-GPU sanity check for every registered transform
+python -m strategy.smoke
+
+# 3. see the exact baseline work (n defaults to 12000)
 python -m matmul --n 12000 --verify
 
-# 3. run a smart strategy
+# 4. run a smart strategy
 python -m strategy --n 12000 --transform rsvd --verify
 
-# 4. self-score all strategies on the reference regime: 12000, full-rank
+# 5. self-score all strategies on the reference regime: 12000, full-rank
 #    (this is what you paste in a PR)
 python -m eval --n 12000 --pairs 3
 
-# 5. run the tests (they skip if no GPU is present)
+# 6. run the tests (they skip if no GPU is present)
 python tests/test_correctness.py
 python eval/tests/test_eval.py
 python strategy/tests/test_subspace.py
@@ -186,17 +190,20 @@ open a PR with the scorecard.
 CCO/
 ├── matmul/         normal (exact) engine — the O(N³) frontier to beat  [matmul/README.md]
 ├── strategy/       smart (subspace) strategies; add transforms here    [strategy/README.md]
-│   └── transforms.py   the pluggable "core tech" you innovate on
+│   ├── transforms.py   the pluggable "core tech" you innovate on
+│   └── smoke.py        fast, no-GPU sanity check for every transform
 ├── eval/           the scorer: accuracy · latency · VRAM · complexity → score  [eval/README.md]
 ├── tests/          correctness gates for the exact engine
 ├── examples/       runnable usage snippets
+├── docs/           whitepaper, research program, and rollout strategy
 ├── README.md          you are here — why/how/gates/rules
 ├── CONTRIBUTING.md    the one rule · self-score locally · submit
 ├── BENCHMARKS.md      how every number is produced · honesty notes
-├── CHANGELOG.md
 ├── LICENSE            MIT
 ├── requirements.txt
+├── pyproject.toml
 └── .github/
+    ├── CODEOWNERS                 maintainer-owned paths (eval/, docs/, .github/)
     └── PULL_REQUEST_TEMPLATE.md   the scorecard your PR must fill in
 ```
 

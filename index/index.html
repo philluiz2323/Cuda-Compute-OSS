@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CCO (Cuda-Compute-OSS) — Sub-Quadratic Attention for Transformer LLMs</title>
-<meta name="description" content="CCO (Cuda-Compute-OSS) replaces the O(n²) self-attention bottleneck with open-source, hardware-validated sub-quadratic kernels — delivered as a drop-in library and commercial API.">
+<title>CCO (Cuda-Compute-OSS) — An Open Arena for Cheaper Matrix Multiplication</title>
+<meta name="description" content="CCO is an open-source benchmark arena for approximate matrix multiplication, whitelisted on Bittensor SN74 (Gittensor). Submit a strategy, score it against a deterministic dominance gate, and earn for a genuine improvement.">
 <style>
   :root{
     --bg:#0a0f1c;
@@ -179,18 +179,6 @@
   .notice p{font-size:15.5px;color:var(--muted)}
   .notice-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
 
-  /* ---------- Pricing ---------- */
-  .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
-  .price{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;position:relative}
-  .price.pop{border-color:rgba(79,140,245,.5);background:linear-gradient(180deg,rgba(79,140,245,.09),var(--panel))}
-  .price .badge{position:absolute;top:-11px;left:26px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:var(--accent-grad);color:#05203a;padding:4px 11px;border-radius:999px;font-weight:700}
-  .price .tier{font-size:14px;font-family:var(--mono);color:var(--accent-2);letter-spacing:.08em;text-transform:uppercase}
-  .price .who{color:var(--muted-2);font-size:13.5px;margin:4px 0 22px}
-  .price ul{list-style:none;display:grid;gap:13px;margin:22px 0 26px}
-  .price li{display:flex;gap:11px;font-size:14.5px;color:var(--muted)}
-  .price li svg{flex:none;width:18px;height:18px;stroke:var(--ok);margin-top:2px}
-  .price .btn{width:100%;justify-content:center}
-
   /* ---------- CTA ---------- */
   .cta{padding:80px 0}
   .cta-box{
@@ -233,7 +221,7 @@
     .stats-grid{grid-template-columns:repeat(2,1fr)}
     .stat:nth-child(2){border-right:0}
     .stat{border-bottom:1px solid var(--line)}
-    .cols-3,.cols-2,.price-grid,.flow,.cols-4{grid-template-columns:1fr}
+    .cols-3,.cols-2,.flow,.cols-4{grid-template-columns:1fr}
     .tl-row{grid-template-columns:1fr;gap:12px}
     .sec{padding:72px 0}
     .hero{padding:64px 0 48px}
@@ -251,14 +239,14 @@
     <nav class="nav-links">
       <a href="#problem">Problem</a>
       <a href="#how">How it works</a>
-      <a href="#gittensor">Gittensor</a>
       <a href="#tech">Technology</a>
-      <a href="#product">Product</a>
-      <a href="#pricing">Pricing</a>
+      <a href="#trust">Evaluation</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#gittensor">Gittensor</a>
     </nav>
     <div class="nav-cta">
-      <a class="btn btn-ghost" href="pattention_optimization_whitepaper.pdf">Whitepaper</a>
-      <a class="btn btn-primary" href="#pricing">Get API access</a>
+      <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/docs/whitepaper.md">Whitepaper</a>
+      <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Contribute a strategy</a>
       <button class="nav-toggle" aria-label="Menu" onclick="document.body.classList.toggle('mobile-open')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
@@ -272,17 +260,17 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="reveal">
-      <div class="eyebrow">Sub-quadratic attention · Drop-in GPU kernels</div>
-      <h1>Break the <span class="grad">O(n²)</span> wall in Transformer LLMs.</h1>
-      <p class="lead">CCO delivers open-source, hardware-validated attention kernels that match standard accuracy while running in sub-quadratic time and memory — as a drop-in library and a commercial API.</p>
-      <div class="hero-callout"><b>Built with help from Gittensor.</b> Gittensor helps power this project, and this repository and website are the public places to understand the work, follow progress, and contribute through GitHub.</div>
+      <div class="eyebrow">Open matmul benchmark arena · Bittensor SN74</div>
+      <h1>An open arena for <span class="grad">cheaper</span> matrix multiplication.</h1>
+      <p class="lead"><code style="font-family:var(--mono)">C = A × B</code> is the hot loop of nearly all numerical computing. CCO is where you submit a strategy that computes it for less — lower latency, lower VRAM, lower time-complexity — without giving up accuracy, and have that claim measured the same way for everyone.</p>
+      <div class="hero-callout"><b>Whitelisted on Gittensor (Bittensor SN74).</b> Merged strategies earn TAO through Gittensor's emission share for this repository. No Discord access or prior SN74 knowledge required — this repository is the whole story.</div>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#pricing">Get API access
+        <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Contribute a strategy
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
-        <a class="btn btn-ghost" href="attention_optimization_whitepaper.pdf">
+        <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/docs/whitepaper.md">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-          Download whitepaper
+          Read the whitepaper
         </a>
       </div>
       <div class="hero-note"><span class="dot"></span> Deterministic, hardware-measured benchmarks — no LLM-as-a-judge.</div>
@@ -291,17 +279,17 @@
     <div class="reveal code-card" style="transition-delay:.08s">
       <div class="code-top">
         <span class="cdot"></span><span class="cdot"></span><span class="cdot"></span>
-        <span class="cfile">model/attention.py</span>
+        <span class="cfile">strategy/examples/run_example.py</span>
       </div>
-<pre><span class="c-com"># Standard O(n²) attention — memory explodes at long context</span>
-<span class="c-del">- attn = softmax(Q @ K.T / sqrt(d)) @ V</span>
+<pre><span class="c-com"># Normal (exact) computing — O(N³), the frontier you must beat</span>
+<span class="c-del">- C = A @ B</span>
 
-<span class="c-com"># Drop-in CCO champion kernel — sub-quadratic</span>
-<span class="c-add">+ from cco import attention as fast_attn</span>
-<span class="c-add">+ attn = fast_attn(Q, K, V)</span>
+<span class="c-com"># Smart (subspace) strategy — compress, compute, reconstruct</span>
+<span class="c-add">+ from strategy import subspace_matmul, Config</span>
+<span class="c-add">+ C = subspace_matmul(A, B, config=Config(transform="rsvd", rank_m=128))</span>
 
-<span class="c-key">assert</span> <span class="c-fn">mse</span>(attn, ground_truth) &lt; <span class="c-str">1e-3</span>   <span class="c-com"># same output</span>
-<span class="c-com"># 128K ctx · ~18% lower inference cost · same GPU</span></pre>
+<span class="c-key">assert</span> <span class="c-fn">rel_err</span>(C, A @ B) &lt; <span class="c-str">1e-2</span>   <span class="c-com"># admitted only if accurate AND cheaper</span>
+<span class="c-com"># O(N²M) vs O(N³) · scored on accuracy, latency, VRAM, FLOPs — together</span></pre>
     </div>
   </div>
 </section>
@@ -311,11 +299,11 @@
   <div class="wrap">
     <div class="notice reveal">
       <div class="eyebrow">Gittensor</div>
-      <h3>Gittensor helps power the work behind CCO.</h3>
-      <p>You should not need Discord context or prior knowledge of SN74 to understand where the project comes from. The short version is that Gittensor is part of the network and support structure helping this software get built, while this repository remains the public source of truth for the code, benchmarks, documentation, and pull requests.</p>
+      <h3>CCO earns through Gittensor — Bittensor subnet 74.</h3>
+      <p>Gittensor pays TAO for real, merged pull requests to whitelisted open-source repositories. CCO is one of them. You don't need Discord access or prior SN74 knowledge to take part — read the docs here, run the scorer on your own GPU, and open a PR through the same GitHub path as any open-source project. This repository stays the single source of truth for the code, the scorer, the docs, and every admitted improvement.</p>
       <div class="notice-links">
-        <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS">View GitHub repo</a>
-        <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Read CONTRIBUTING.md</a>
+        <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS">View the GitHub repo</a>
+        <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/docs/sn74-emission-strategy.md">How rewards work</a>
       </div>
     </div>
   </div>
@@ -324,10 +312,10 @@
 <!-- ============ STAT BAND ============ -->
 <section class="stats">
   <div class="wrap stats-grid">
-    <div class="stat reveal"><div class="n grad">O(n²)→O(n)</div><div class="l">Quadratic bottleneck, removed</div></div>
-    <div class="stat reveal"><div class="n">1M</div><div class="l">Token context target</div></div>
-    <div class="stat reveal"><div class="n">10–20%</div><div class="l">Lower GPU inference cost</div></div>
-    <div class="stat reveal"><div class="n">100%</div><div class="l">Open-source champion kernels</div></div>
+    <div class="stat reveal"><div class="n grad">O(N³)→O(N²M)</div><div class="l">Complexity a strategy must beat</div></div>
+    <div class="stat reveal"><div class="n">4</div><div class="l">Cost axes scored together — never traded off</div></div>
+    <div class="stat reveal"><div class="n">SN74</div><div class="l">Bittensor subnet — Gittensor</div></div>
+    <div class="stat reveal"><div class="n">100%</div><div class="l">Open-source, reproducible scorecard</div></div>
   </div>
 </section>
 
@@ -336,24 +324,24 @@
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="eyebrow">The problem</div>
-      <h2>Attention cost grows with the <span class="grad">square</span> of context.</h2>
-      <p>Self-attention computes an n × n score matrix, so memory and compute explode non-linearly as context grows. Frontier models push the limit with engineering workarounds — not by changing the underlying math.</p>
+      <h2>Matrix multiply cost grows with the <span class="grad">cube</span> of size.</h2>
+      <p><code style="font-family:var(--mono)">C = A × B</code> costs 2N³ FLOPs computed exactly. The same cubic cost sits underneath the attention layers in every Transformer LLM — which is why CCO's longer-run roadmap points toward sub-quadratic attention (see Roadmap below) — but today's arena is the general, provider-agnostic case: exact matrix multiplication, measured honestly.</p>
     </div>
     <div class="cards cols-3">
       <div class="card scale-card reveal">
-        <div class="kpi">64M</div>
-        <div class="sub">8,000 tokens</div>
-        <p style="margin-top:12px">Score values per attention layer — already heavy for real-time inference.</p>
+        <div class="kpi">2 GFLOP</div>
+        <div class="sub">N = 1,000</div>
+        <p style="margin-top:12px">Trivial today — the N³ term means this is not where the real cost lives.</p>
       </div>
       <div class="card scale-card reveal" style="transition-delay:.06s">
-        <div class="kpi">16B</div>
-        <div class="sub">128,000 tokens</div>
-        <p style="margin-top:12px">Per layer. Latency and VRAM climb steeply as documents and agent histories grow.</p>
+        <div class="kpi">3.5 TFLOP</div>
+        <div class="sub">N = 12,000 — CCO's reference regime</div>
+        <p style="margin-top:12px">Full-rank data, deliberately the hard case — no structure to exploit for free.</p>
       </div>
       <div class="card scale-card reveal" style="transition-delay:.12s">
-        <div class="kpi">1T</div>
-        <div class="sub">1,000,000 tokens</div>
-        <p style="margin-top:12px">Per layer — beyond what is commercially available today. This is the wall.</p>
+        <div class="kpi">4.2 PFLOP</div>
+        <div class="sub">N = 128,000 — out-of-core scale</div>
+        <p style="margin-top:12px">Where the exact engine must tile across disk-backed memory — a cheaper algorithm stops being optional.</p>
       </div>
     </div>
   </div>
@@ -364,66 +352,66 @@
   <div class="wrap">
     <div class="sec-head center reveal">
       <div class="eyebrow">How it works</div>
-      <h2>A continuous, winner-take-all engineering competition.</h2>
-      <p>The best GPU engineers in the world compete every cycle to produce faster kernels. An automated engine scores them, the champion ships to production, and revenue funds the next round.</p>
+      <h2>Submit a strategy. Get scored. Get paid for what genuinely improves.</h2>
+      <p>No prize pool, no cycles, no committee — a deterministic scorer decides, and Gittensor's emission share pays for what it admits.</p>
     </div>
     <div class="flow">
       <div class="step reveal">
         <div class="num">01</div>
-        <h3>Contributors compete</h3>
-        <p>Engineers submit open-source sub-quadratic attention kernels each cycle, on randomly seeded inputs, through the public GitHub repository.</p>
+        <h3>Submit a strategy</h3>
+        <p>Add a <code style="font-family:var(--mono)">Transform</code> to <code style="font-family:var(--mono)">strategy/transforms.py</code> and open a PR with your self-scored scorecard.</p>
         <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
       <div class="step reveal" style="transition-delay:.06s">
         <div class="num">02</div>
         <h3>Deterministic scoring</h3>
-        <p>An engine re-compiles and benchmarks every kernel for accuracy (MSE), VRAM, and latency on locked hardware.</p>
+        <p><code style="font-family:var(--mono)">python -m eval</code> reruns your strategy against the exact baseline on identical inputs — accuracy, latency, VRAM, FLOPs, together.</p>
         <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
       <div class="step reveal" style="transition-delay:.12s">
         <div class="num">03</div>
-        <h3>Champion published</h3>
-        <p>The single best kernel wins the full prize pool and is released to the public library — raising the bar for all.</p>
+        <h3>Merge on merit</h3>
+        <p>Admitted only if it dominates the exact baseline on <em>every</em> cost axis while holding accuracy — no averaging a win on one axis against a loss on another.</p>
         <span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </div>
       <div class="step reveal" style="transition-delay:.18s">
         <div class="num">04</div>
-        <h3>Revenue reinvests</h3>
-        <p>Enterprises pay to use the champion via API; a share funds a bigger prize pool — and better kernels. Gittensor helps power the surrounding ecosystem that makes this work possible.</p>
+        <h3>Gittensor pays</h3>
+        <p>SN74 validators see the merged PR and pay TAO from CCO's emission share — no separate application, no cycle to wait for.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ TECHNOLOGY / DROP-IN ============ -->
+<!-- ============ TECHNOLOGY ============ -->
 <section class="sec" id="tech">
   <div class="wrap split">
     <div class="reveal">
       <div class="eyebrow">The technology</div>
-      <h2 style="font-size:clamp(28px,3.4vw,40px);margin:14px 0 18px">A mathematically valid drop-in replacement.</h2>
-      <p style="color:var(--muted);font-size:16.5px">The attention layer's input and output shapes are identical — <span style="font-family:var(--mono);color:var(--ink)">[n, d]</span>. Any kernel that maps Q, K, V to the correct output <em>without</em> materializing the n × n matrix can replace standard attention with no model retraining.</p>
+      <h2 style="font-size:clamp(28px,3.4vw,40px);margin:14px 0 18px">Compress, compute, reconstruct.</h2>
+      <p style="color:var(--muted);font-size:16.5px">The reference strategy projects A and B onto a shared M-dimensional subspace (M ≪ N), multiplies the small M×M cores, and reconstructs — O(N²M) instead of O(N³). The subspace basis is the pluggable part: a <span style="font-family:var(--mono);color:var(--ink)">Transform</span> you write and register.</p>
       <ul class="feature-list">
-        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>Near-identical accuracy.</b> Every kernel must pass a hard MSE gate against ground-truth O(n²) output.</span></li>
-        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>Hardware-real speed.</b> Kernels are written in Triton / CUDA and measured on standardized GPUs — not just in theory.</span></li>
-        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>Works with your stack.</b> Llama-3, Mistral, Qwen, or any Transformer — swap one layer, keep your weights.</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>Exact baseline, always.</b> Every strategy is compared to real <code style="font-family:var(--mono)">A @ B</code> on identical random inputs — never a synthetic or cherry-picked case.</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>Honest by construction.</b> The reference regime is full-rank data — no low-rank structure to exploit for free. Beating it means finding real structure.</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><b>One registration away.</b> Subclass <code style="font-family:var(--mono)">Transform</code>, implement <code style="font-family:var(--mono)">basis()</code>, call <code style="font-family:var(--mono)">register_transform()</code> — that's the whole interface.</span></li>
       </ul>
     </div>
     <div class="reveal code-card" style="transition-delay:.08s">
       <div class="code-top">
         <span class="cdot"></span><span class="cdot"></span><span class="cdot"></span>
-        <span class="cfile">the operation that explodes</span>
+        <span class="cfile">strategy/subspace.py</span>
       </div>
       <div style="padding:26px 24px">
-        <div class="eq">Attention(Q, K, V) = softmax( Q · K<sup>T</sup> / √d ) · V</div>
-        <p style="color:var(--muted);font-size:14.5px;margin:14px 0 18px">The bottleneck is a single intermediate step — <span style="font-family:var(--mono);color:var(--accent-2)">Q · K<sup>T</sup></span>, the n × n score matrix. Because it is only intermediate, replacing it is provably possible.</p>
+        <div class="eq">Ã = Qᵀ A Q &nbsp;&nbsp; B̃ = Qᵀ B Q &nbsp;&nbsp; C̃ = Ã B̃ &nbsp;&nbsp; C ≈ Q C̃ Qᵀ</div>
+        <p style="color:var(--muted);font-size:14.5px;margin:14px 0 18px">Q is an (N, M) orthonormal basis — the only thing a contributed <span style="font-family:var(--mono);color:var(--accent-2)">Transform</span> supplies. Everything else in the pipeline is shared, tested infrastructure.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div style="background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:14px">
-            <div style="font-family:var(--mono);font-size:12px;color:var(--muted-2)">INPUT</div>
-            <div style="font-family:var(--mono);font-size:16px;margin-top:4px">Q, K, V → [n, d]</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--muted-2)">EXACT</div>
+            <div style="font-family:var(--mono);font-size:16px;margin-top:4px">O(N³)</div>
           </div>
           <div style="background:rgba(55,211,224,.06);border:1px solid rgba(55,211,224,.25);border-radius:10px;padding:14px">
-            <div style="font-family:var(--mono);font-size:12px;color:var(--muted-2)">OUTPUT</div>
-            <div style="font-family:var(--mono);font-size:16px;margin-top:4px;color:var(--accent-2)">out → [n, d]</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--muted-2)">SUBSPACE</div>
+            <div style="font-family:var(--mono);font-size:16px;margin-top:4px;color:var(--accent-2)">O(N²M), M ≪ N</div>
           </div>
         </div>
       </div>
@@ -437,23 +425,23 @@
     <div class="sec-head reveal">
       <div class="eyebrow">Deterministic evaluation</div>
       <h2>Scored by physics, not opinion.</h2>
-      <p>Every submission passes through a fully automated, three-tier gate. No language model ever judges another — ranking is pure measurement, reproducible by anyone.</p>
+      <p>Every submission passes through the same automated gate on identical inputs. No language model ever judges another strategy — ranking is pure measurement, reproducible by anyone with a GPU.</p>
     </div>
     <div class="cards cols-3">
       <div class="card reveal">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
-        <h3>Tier 1 · Accuracy gate</h3>
-        <p>Mean Squared Error against ground-truth attention. Exceed the precision budget and the kernel scores zero — speed is irrelevant if the output is wrong.</p>
+        <h3>Tier 1 · Accuracy floor</h3>
+        <p>Bounded Frobenius accuracy against the exact product. Fall below the floor and the score is zero — a fast wrong answer is not an improvement.</p>
       </div>
       <div class="card reveal" style="transition-delay:.06s">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
         <h3>Tier 2 · Scaling proof</h3>
-        <p>Re-run at 128K–256K tokens on locked hardware. Double the sequence length: if latency quadruples, it isn't sub-quadratic — and it's rejected.</p>
+        <p>An empirical N^p fit from <code style="font-family:var(--mono)">--sweep</code>. A claimed sub-cubic strategy must show it in measured latency, not just in algebra.</p>
       </div>
       <div class="card reveal" style="transition-delay:.12s">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7-6.5-4.5L5.5 27"/><path d="M12 2l3 7h7l-5.5 4 2 7L12 15.5 6.5 20l2-7L3 9h7z"/></svg></div>
-        <h3>Tier 3 · Composite score</h3>
-        <p>Among kernels that pass both gates, the highest <span style="font-family:var(--mono);color:var(--accent-2)">accuracy × 1/VRAM × 1/latency</span> takes 100% of the prize. Winner-take-all.</p>
+        <h3>Tier 3 · Dominance gate</h3>
+        <p>Admitted only if latency, VRAM, <em>and</em> FLOPs all beat the exact baseline while accuracy holds. One regressing axis disqualifies it — no averaging a win against a loss.</p>
       </div>
     </div>
   </div>
@@ -464,20 +452,28 @@
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="eyebrow">Roadmap</div>
-      <h2>Difficulty ratchets up as each phase is solved.</h2>
-      <p>Progress is gated by achievement, not a calendar. Early phases are accessible to any skilled GPU engineer; later phases demand production-grade, hardware-tuned kernels.</p>
+      <h2>From matmul, live today, to sub-quadratic attention.</h2>
+      <p>Progress is gated by achievement, not a calendar. Phase 0 is the open arena running right now; Phases 1–4 are the longer-run bet that the same verification discipline can crack the O(n²) attention bottleneck in Transformer LLMs.</p>
     </div>
     <div class="timeline">
       <div class="tl-row reveal">
-        <div class="tl-phase">Phase 1<span class="ph-time">Months 1–2</span></div>
+        <div class="tl-phase">Phase 0<span class="ph-time">Live now</span></div>
         <div class="tl-body">
-          <h3>Foundation — up to 32K tokens</h3>
-          <p>Adapt existing open-source optimizations (FlashAttention variants, sparse attention) to the CCO format. MSE &lt; 0.01.</p>
-          <div class="tl-tags"><span class="tag">FlashAttention</span><span class="tag">sparse</span><span class="tag">32K ctx</span></div>
+          <h3>Matmul arena</h3>
+          <p>Approximate and exact-but-cheaper strategies for C = A × B, scored on full-rank, low-rank, and decaying-spectrum regimes. Open for contributions today.</p>
+          <div class="tl-tags"><span class="tag">subspace</span><span class="tag">N=12000</span><span class="tag">open now</span></div>
         </div>
       </div>
       <div class="tl-row reveal">
-        <div class="tl-phase">Phase 2<span class="ph-time">Months 3–5</span></div>
+        <div class="tl-phase">Phase 1<span class="ph-time">Roadmap</span></div>
+        <div class="tl-body">
+          <h3>Foundation — up to 32K tokens</h3>
+          <p>Adapt the matmul-arena discipline to attention: sub-quadratic kernels validated against ground-truth attention output. MSE &lt; 0.01.</p>
+          <div class="tl-tags"><span class="tag">FlashAttention</span><span class="tag">spectral mixing</span><span class="tag">32K ctx</span></div>
+        </div>
+      </div>
+      <div class="tl-row reveal">
+        <div class="tl-phase">Phase 2<span class="ph-time">Roadmap</span></div>
         <div class="tl-body">
           <h3>Log-linear — up to 128K tokens</h3>
           <p>Novel hybrid approaches required; spectral or low-rank kernels needed to pass the scaling gate. MSE &lt; 0.005.</p>
@@ -485,11 +481,11 @@
         </div>
       </div>
       <div class="tl-row reveal">
-        <div class="tl-phase">Phase 3<span class="ph-time">Months 6–12</span></div>
+        <div class="tl-phase">Phase 3<span class="ph-time">Roadmap</span></div>
         <div class="tl-body">
           <h3>Million-token — up to 1M tokens</h3>
           <p>Production-grade kernels with true sub-quadratic VRAM scaling and hardware-specific Triton/CUDA tuning. MSE &lt; 0.001.</p>
-          <div class="tl-tags"><span class="tag">Triton/CUDA</span><span class="tag">1M ctx</span><span class="tag">production</span></div>
+          <div class="tl-tags"><span class="tag">Triton/CUDA</span><span class="tag">1M ctx</span></div>
         </div>
       </div>
       <div class="tl-row reveal">
@@ -504,75 +500,33 @@
   </div>
 </section>
 
-<!-- ============ PRODUCT OFFERING ============ -->
+<!-- ============ GET INVOLVED ============ -->
 <section class="sec" id="product" style="background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="eyebrow">The product</div>
-      <h2>Two ways to ship faster inference.</h2>
+      <div class="eyebrow">Get involved</div>
+      <h2>Two ways to take part today.</h2>
     </div>
     <div class="cards cols-2">
       <div class="card reveal">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/></svg></div>
-        <h3>Open-source kernel library</h3>
-        <p style="margin-bottom:18px">Every cycle's champion is published to a public GitHub repository — the fastest, most accurate, most memory-efficient kernel validated to date. Free to study, fork, and self-host.</p>
+        <h3>Contribute a strategy</h3>
+        <p style="margin-bottom:18px">Add a <span style="font-family:var(--mono)">Transform</span>, self-score it, open a PR. Admitted improvements are merged and — through Gittensor — paid.</p>
         <ul class="feature-list">
-          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>Longer context windows without adding hardware</span></li>
-          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>Higher throughput at the same GPU budget</span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>One rule: every cost axis down, accuracy held</span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>Reviewed and merged on the reproduced scorecard</span></li>
         </ul>
+        <a class="btn btn-primary" style="margin-top:6px" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Read CONTRIBUTING.md</a>
       </div>
       <div class="card reveal" style="transition-delay:.06s">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-        <h3>Commercial API</h3>
-        <p style="margin-bottom:18px">Submit your model configuration and receive an optimized, tested attention module — with compatibility testing, regression checks, and versioning handled for you.</p>
+        <h3>Run the scorer</h3>
+        <p style="margin-bottom:18px">Clone the repo, install PyTorch, and reproduce the reference scorecard on your own GPU — the same numbers a reviewer checks.</p>
         <ul class="feature-list">
-          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>Inference providers (vLLM, SGLang, Fireworks, Together)</span></li>
-          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>Long-document & long-horizon agent workloads</span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span>CUDA or Apple MPS, PyTorch-only</span></li>
+          <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></span><span><code style="font-family:var(--mono)">python -m eval --n 12000 --pairs 3</code></span></li>
         </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PRICING ============ -->
-<section class="sec" id="pricing">
-  <div class="wrap">
-    <div class="sec-head center reveal">
-      <div class="eyebrow">Pricing</div>
-      <h2>Access the champion kernel.</h2>
-      <p>A 10–20% cut in long-context inference cost is worth millions annually at scale. Pricing sits well below that — and far above our marginal cost.</p>
-    </div>
-    <div class="price-grid">
-      <div class="price reveal">
-        <div class="tier">Standard</div>
-        <div class="who">Startups & mid-size AI teams</div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Monthly API access to current champion</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Integration docs & examples</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Community support</li>
-        </ul>
-        <a class="btn btn-ghost" href="#cta">Start free trial</a>
-      </div>
-      <div class="price pop reveal" style="transition-delay:.06s">
-        <div class="badge">Most popular</div>
-        <div class="tier">Pro</div>
-        <div class="who">Inference providers & enterprise teams</div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Everything in Standard</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Priority updates & SLA guarantees</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Compatibility testing per model family</li>
-        </ul>
-        <a class="btn btn-primary" href="#cta">Get Pro access</a>
-      </div>
-      <div class="price reveal" style="transition-delay:.12s">
-        <div class="tier">Enterprise</div>
-        <div class="who">AI labs, cloud providers, defense</div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Custom integration & private deployment</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Co-developed model-specific weight patches</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Dedicated engineering support</li>
-        </ul>
-        <a class="btn btn-ghost" href="#cta">Contact sales</a>
+        <a class="btn btn-ghost" style="margin-top:6px" href="https://github.com/zeokin/Cuda-Compute-OSS">See the quickstart</a>
       </div>
     </div>
   </div>
@@ -582,11 +536,11 @@
 <section class="cta" id="cta">
   <div class="wrap">
     <div class="cta-box reveal">
-      <h2>Stop paying the quadratic tax.</h2>
-      <p>Get early access to the champion kernel, or read the full technical whitepaper to see exactly how the competition and economics work.</p>
+      <h2>The frontier is open.</h2>
+      <p>Read the whitepaper to see exactly how scoring and rewards work, or jump straight to contributing a strategy — the scorer decides, not us.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="mailto:hello@example.com?subject=CCO%20API%20access">Request API access</a>
-        <a class="btn btn-ghost" href="attention_optimization_whitepaper.pdf">Read the whitepaper</a>
+        <a class="btn btn-primary" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Contribute a strategy</a>
+        <a class="btn btn-ghost" href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/docs/whitepaper.md">Read the whitepaper</a>
       </div>
     </div>
   </div>
@@ -598,8 +552,8 @@
     <div class="foot-grid">
       <div class="foot-brand">
         <a class="brand" href="#top"><span class="logo">C</span> CCO</a>
-        <p>Cuda-Compute-OSS — open-source, hardware-validated sub-quadratic attention kernels for Transformer LLMs.</p>
-        <p style="margin-top:10px">Built with help from Gittensor and developed in public on GitHub.</p>
+        <p>Cuda-Compute-OSS — an open, reproducible arena for cheaper matrix multiplication.</p>
+        <p style="margin-top:10px">Whitelisted on Gittensor (Bittensor SN74); developed in public on GitHub.</p>
       </div>
       <div>
         <h4>Platform</h4>
@@ -607,32 +561,32 @@
           <li><a href="#problem">The problem</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#tech">Technology</a></li>
-          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#trust">Evaluation</a></li>
         </ul>
       </div>
       <div>
         <h4>Resources</h4>
         <ul>
-          <li><a href="attention_optimization_whitepaper.pdf">Whitepaper (PDF)</a></li>
+          <li><a href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/docs/whitepaper.md">Whitepaper</a></li>
           <li><a href="#roadmap">Roadmap</a></li>
-          <li><a href="#attention_optimization">Kernel library</a></li>
-          <li><a href="#trust">Evaluation</a></li>
+          <li><a href="https://github.com/zeokin/Cuda-Compute-OSS/tree/main/strategy">Strategy library</a></li>
+          <li><a href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/BENCHMARKS.md">Benchmarks</a></li>
         </ul>
       </div>
       <div>
-        <h4>Company</h4>
+        <h4>Repository</h4>
         <ul>
-          <li><a href="#cta">Contact</a></li>
-          <li><a href="#cta">Request access</a></li>
+          <li><a href="https://github.com/zeokin/Cuda-Compute-OSS">GitHub</a></li>
+          <li><a href="https://github.com/zeokin/Cuda-Compute-OSS/blob/main/CONTRIBUTING.md">Contribute</a></li>
           <li><a href="#top">About</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 CCO (Cuda-Compute-OSS). All rights reserved.</span>
-      <span>Built from the CCO whitepaper · Gittensor-powered project · Draft v0.1</span>
+      <span>© 2026 CCO (Cuda-Compute-OSS). MIT licensed.</span>
+      <span>Whitepaper v0.2 · A Gittensor (SN74) repository</span>
     </div>
-    <p class="disclaimer">This site presents a working draft product concept. Technical parameters (MSE thresholds, sequence lengths, scoring weights, revenue-reinvestment ratios) are subject to revision based on testnet results and feedback. Nothing herein constitutes financial advice. Replace the placeholder contact details (e.g. hello@example.com) with your own before launch.</p>
+    <p class="disclaimer">Technical parameters (accuracy floors, track definitions, label tiers) are governance-tunable and subject to revision as the evaluation infrastructure matures. CCO is a whitelisted repository on Bittensor subnet 74 (Gittensor); it is not a separate network, token, or investment product. Nothing herein constitutes financial advice.</p>
   </div>
 </footer>
 
