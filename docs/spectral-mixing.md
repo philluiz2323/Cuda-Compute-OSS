@@ -6,7 +6,7 @@ that limit: transform to frequency space, mix in O(n), transform back — why
 sub-quadratic attention is mathematically possible, how to build it, and what
 an up-to-18× inference speedup is worth in the real world.**
 
-Whitepaper — Draft v0.2 · July 2026
+Whitepaper · July 2026
 
 ---
 

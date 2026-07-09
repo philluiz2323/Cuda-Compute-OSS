@@ -2,17 +2,7 @@
 
 **Verified cheaper GPU compute — from exact matmul to sub-quadratic attention.**
 
-Whitepaper — v0.2 · July 2026
-
-> **Changelog**
-> - **v0.2 (July 2026)** — Reframed from a standalone-subnet proposal to what CCO
->   actually is: an open-source repository earning inside **Gittensor (Bittensor
->   SN74)**. Added *Current Status*, *Reference Regime & Live Frontier* (fixed
->   GPU, fixed workload, one frontier curve per merged PR), and *Phase 0* to the
->   difficulty roadmap. Aligned all scoring formulas with the shipped `eval/`
->   harness. Rebranded "attention_optimization" → CCO, with attention as the
->   flagship track.
-> - **v0.1 (July 2026)** — Initial draft ("attention_optimization").
+Whitepaper · July 2026
 
 ---
 
@@ -397,9 +387,8 @@ curve is the whole game.
 
 ---
 
-*This document is a working draft (v0.2). Technical parameters — accuracy
-floors, label thresholds, track definitions, regime pins — are
-governance-tunable and subject to revision as the evaluation infrastructure
-(§6–7) ships. CCO is a whitelisted repository on Bittensor subnet 74
-(Gittensor); it is not a separate network, token, or investment product.
-Nothing herein constitutes financial advice.*
+*Technical parameters — accuracy floors, label thresholds, track definitions,
+regime pins — are governance-tunable and may change as the evaluation
+infrastructure (§6–7) evolves. CCO is a whitelisted repository on Bittensor
+subnet 74 (Gittensor); it is not a separate network, token, or investment
+product. Nothing herein constitutes financial advice.*
