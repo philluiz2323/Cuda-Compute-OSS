@@ -28,6 +28,7 @@ from eval.pr_bot import (
     build_queue_dashboard,
     changed_files,
     excess_open_prs,
+    has_coding_agent_coauthor,
     has_scorecard,
     merge_conflict_comment_time,
     process_pr,
@@ -50,6 +51,16 @@ Adds a new transform.
 """
 
 NO_SCORECARD_BODY = "Adds a new transform. No testing done yet."
+CODING_AGENT_COMMIT = """\
+fix: useful change
+
+Co-authored-by: Cursor <cursoragent@cursor.com>
+"""
+HUMAN_COAUTHOR_COMMIT = """\
+fix: useful change
+
+Co-authored-by: Alice Example <alice@example.com>
+"""
 
 SOME_DIFF = """\
 diff --git a/strategy/transforms.py b/strategy/transforms.py
@@ -102,6 +113,28 @@ def test_process_pr_closes_excess_open_pr():
     out = process_pr(pr, SOME_DIFF, [], frozenset(), [], frozenset({1}))
     assert out.action == "close_excess_open_pr"
     assert str(MAX_OPEN_PRS_PER_AUTHOR) in out.detail
+
+
+def test_has_coding_agent_coauthor_detects_agent_footers_only():
+    assert has_coding_agent_coauthor(CODING_AGENT_COMMIT)
+    assert has_coding_agent_coauthor("Co-authored-by: Claude <noreply@anthropic.com>")
+    assert has_coding_agent_coauthor("Co-authored-by: Codex <codex@openai.com>")
+    assert not has_coding_agent_coauthor(HUMAN_COAUTHOR_COMMIT)
+    assert not has_coding_agent_coauthor("")
+
+
+def test_coding_agent_coauthor_blocks_pr_routing():
+    pr = _pr(number=1, body=SCORECARD_BODY)
+    out = process_pr(
+        pr,
+        SOME_DIFF,
+        [],
+        frozenset(),
+        [],
+        commit_messages=CODING_AGENT_COMMIT,
+    )
+    assert out.action == "close_coding_agent_coauthor"
+    assert out.label is None
 
 
 def test_merge_conflict_without_prior_comment_requests_resolution():
@@ -251,10 +284,11 @@ def test_excess_open_prs_ignores_recent_updates_and_closes_newer_prs():
 class FakeClient:
     """In-memory stand-in for GitHubClient -- no subprocess/network calls."""
 
-    def __init__(self, prs, diffs, comments=None):
+    def __init__(self, prs, diffs, comments=None, commit_messages=None):
         self._prs = prs               # dict: state -> list[PRInfo]
         self._diffs = diffs           # dict: pr_number -> diff text
         self._comments = comments or {}
+        self._commit_messages = commit_messages or {}
         self.actions = []             # records of what WOULD have been written
 
     def list_prs(self, state="open"):
@@ -267,6 +301,9 @@ class FakeClient:
 
     def get_comments(self, pr_number):
         return self._comments.get(pr_number, [])
+
+    def get_commit_messages(self, pr_number):
+        return self._commit_messages.get(pr_number, "")
 
     def post_comment(self, pr_number, body):
         self.actions.append(("post_comment", pr_number, body))
@@ -320,6 +357,18 @@ def test_run_once_live_mode_does_not_repeat_needs_scorecard_comment():
     assert outcomes[0].action == "needs_scorecard"
     assert ("add_label", 1, "status:needs-scorecard") in client.actions
     assert not any(a[0] == "post_comment" for a in client.actions)
+
+
+def test_run_once_live_mode_blocks_coding_agent_coauthor_footer():
+    pr1 = _pr(number=1, author="alice", body=SCORECARD_BODY)
+    client = FakeClient(
+        prs={"all": [pr1], "open": [pr1]},
+        diffs={1: SOME_DIFF},
+        commit_messages={1: CODING_AGENT_COMMIT},
+    )
+    outcomes = run_once(client, dry_run=False)
+    assert outcomes[0].action == "close_coding_agent_coauthor"
+    assert ("close_pr", 1, outcomes[0].detail) in client.actions
 
 
 def test_run_once_live_mode_labels_gpu_queue():

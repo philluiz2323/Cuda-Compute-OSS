@@ -210,6 +210,9 @@ the contribution loop is:
 
 - for bug fixes: implement the change, run the CPU-safe validation, open a `fix:` PR
 - for improvements: implement the change, run `python -m eval ...`, open a `feat:` PR with the scorecard
+- do not include `Co-authored-by` footers for coding agents such as Cursor,
+  Codex, Claude, Copilot, or similar tools; the bot auto-closes PRs with those
+  commit footers
 - keep at most **2 open PRs** per miner; newer overflow PRs are auto-closed by the bot
 - resolve merge conflicts quickly; the bot comments once, then auto-closes an unresolved conflicted PR after **12 hours**
 

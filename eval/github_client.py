@@ -77,6 +77,16 @@ class GitHubClient:
         data = json.loads(out)
         return [c["body"] for c in data.get("comments", [])]
 
+    def get_commit_messages(self, pr_number: int) -> str:
+        out = self._run("pr", "view", str(pr_number), "--json", "commits")
+        data = json.loads(out)
+        parts = []
+        for commit in data.get("commits", []):
+            headline = commit.get("messageHeadline") or ""
+            body = commit.get("messageBody") or ""
+            parts.append(f"{headline}\n{body}".strip())
+        return "\n\n".join(part for part in parts if part)
+
     def post_comment(self, pr_number: int, body: str) -> None:
         subprocess.run(["gh", "pr", "comment", str(pr_number), "-R", self.repo,
                        "--body", body], check=True)

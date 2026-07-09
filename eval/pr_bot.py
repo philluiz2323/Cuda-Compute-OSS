@@ -81,6 +81,11 @@ STRATEGY_HINT_RE = re.compile(
     r"register_transform|class\s+\w+\(Transform\)|\btransform\b|\bstrategy\b",
     re.IGNORECASE,
 )
+CODING_AGENT_COAUTHOR_RE = re.compile(
+    r"(?im)^co-authored-by:\s*.*"
+    r"(cursor|codex|claude|copilot|openai|anthropic|aider|windsurf|devin|"
+    r"codeium|tabnine|qodo|amazon\s*q|coding[- ]?agent|ai[- ]?agent)",
+)
 
 
 @dataclass
@@ -145,6 +150,15 @@ def has_merge_conflict(pr: PRInfo) -> bool:
 
 def has_scorecard(body: str) -> bool:
     return bool(SCORECARD_RE.search(body or ""))
+
+
+def has_coding_agent_coauthor(commit_messages: str) -> bool:
+    """Return True when commit footers co-author a coding agent.
+
+    Human co-authors are fine. The rule is specifically against crediting
+    coding-agent identities such as Cursor, Codex, Claude, Copilot, etc.
+    """
+    return bool(CODING_AGENT_COAUTHOR_RE.search(commit_messages or ""))
 
 
 def changed_files(diff_text: str) -> frozenset[str]:
@@ -261,6 +275,7 @@ def process_pr(
     blocked: frozenset,
     originals: list,
     excess_pr_numbers: frozenset[int] = frozenset(),
+    commit_messages: str = "",
     now: datetime | None = None,
     run_eval=None,
 ) -> GateOutcome:
@@ -275,7 +290,7 @@ def process_pr(
 
     action values: skip_draft, close_blocked, close_excess_open_pr,
     needs_merge_conflict_resolution, close_stale_merge_conflict,
-    copycat_block, copycat_warn,
+    close_coding_agent_coauthor, copycat_block, copycat_warn,
     already_evaluated, needs_pr_kind, needs_scorecard, non_gpu_review,
     eval_pending, evaluated.
     """
@@ -294,6 +309,15 @@ def process_pr(
             "close_excess_open_pr",
             detail=f"{pr.author} already has more than {MAX_OPEN_PRS_PER_AUTHOR} open PRs; "
                    "closing this newer PR and keeping only the two oldest open ones.",
+        )
+
+    if has_coding_agent_coauthor(commit_messages):
+        return GateOutcome(
+            pr.number,
+            "close_coding_agent_coauthor",
+            detail="Commit history contains a Co-authored-by footer for a coding agent "
+                   "(for example Cursor, Codex, Claude, Copilot, or similar). "
+                   "CCO does not accept coding-agent co-author footers.",
         )
 
     if has_merge_conflict(pr):
@@ -402,6 +426,8 @@ def _apply(client: GitHubClient, pr: PRInfo, outcome: GateOutcome, comments: lis
         client.remove_label(pr.number, NEEDS_PR_KIND_LABEL)
         client.remove_label(pr.number, "status:needs-scorecard")
     elif outcome.action == "close_stale_merge_conflict":
+        client.close_pr(pr.number, outcome.detail)
+    elif outcome.action == "close_coding_agent_coauthor":
         client.close_pr(pr.number, outcome.detail)
     elif outcome.action == "copycat_block":
         client.add_label(pr.number, "copycat")
@@ -564,9 +590,11 @@ def run_once(
 
     diff_by_pr = {}
     fp_by_pr = {}
+    commit_messages_by_pr = {}
     for p in all_prs:
         diff_by_pr[p.number] = client.get_diff(p.number)
         fp_by_pr[p.number] = copycat_guard.fingerprint(diff_by_pr[p.number])
+        commit_messages_by_pr[p.number] = client.get_commit_messages(p.number)
 
     outcomes = []
     for pr in open_prs:
@@ -582,6 +610,7 @@ def run_once(
             blocked,
             originals,
             excess_pr_numbers,
+            commit_messages_by_pr.get(pr.number, ""),
             now,
             run_eval,
         )

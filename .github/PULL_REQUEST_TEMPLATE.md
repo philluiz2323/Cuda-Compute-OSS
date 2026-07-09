@@ -60,6 +60,7 @@ VRAM usage      — peak incremental GPU memory during the multiply
 ## Checklist
 
 - [ ] CPU-safe validation passed (`strategy.smoke` if relevant, plus `pytest tests/ strategy/tests/ eval/tests/`).
+- [ ] My commits do not include `Co-authored-by` footers for coding agents such as Cursor, Codex, Claude, Copilot, or similar tools.
 - [ ] If this is a feat PR, I ran the scorer on **unseen** couples — no hardcoding of seeds/matrices.
 - [ ] If this is a feat PR, accuracy and latency come from the **same run** at the **same dtype**.
 - [ ] If this is a feat PR, this is an **improvement** (every cost axis down, accuracy held) **or** I

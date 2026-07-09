@@ -237,10 +237,14 @@ and does not put a PR into the GPU queue.
    is detected automatically and blocked (see
    [`.github/COPYCATS.md`](.github/COPYCATS.md)) — an independently-arrived-at
    similar solution is fine, a copy is not.
-7. **Keep your queue small.** A miner may have at most **2 open PRs** at once.
+7. **Clean commit authorship.** Do not include `Co-authored-by` footers for
+   coding agents such as Cursor, Codex, Claude, Copilot, or similar tools.
+   Human co-authors are fine, but coding-agent co-author credit is not accepted;
+   the bot auto-closes PRs with those commit footers.
+8. **Keep your queue small.** A miner may have at most **2 open PRs** at once.
    If you open a third, the bot keeps the **two oldest** open PRs and closes
    the newer overflow PR automatically.
-8. **Resolve merge conflicts promptly.** If GitHub reports a merge conflict,
+9. **Resolve merge conflicts promptly.** If GitHub reports a merge conflict,
    the bot comments once on that conflicted head SHA. If the conflict is still
    unresolved **12 hours** later, the bot closes the PR automatically.
 
@@ -308,13 +312,15 @@ honestly). If the scorecard can't be reproduced, the PR goes back for evidence
 
 The PR bot runs continuously for non-GPU triage. On each PR event and on a
 15-minute schedule it checks drafts, blocked contributors, copycat overlap, PR
-lane declaration, and scorecard presence when the lane is `feat`.
+lane declaration, clean commit authorship, and scorecard presence when the lane
+is `feat`.
 
 - `fix` / `bug` / docs PRs are labeled `status:ready-non-gpu` after triage.
   They do not enter the GPU queue.
 - matmul `feat` / `strategy` PRs that pass those gates get `status:queued-gpu`
   and appear in `dashboard/data.json` on the `bot/dashboard-state` branch in
   oldest-PR-first order.
+- PRs with coding-agent `Co-authored-by` commit footers are auto-closed.
 - attention prototype PRs do not enter the GPU queue until the official
   attention track is implemented.
 - each miner may keep only **2 open PRs**. If a third or later PR is opened,
