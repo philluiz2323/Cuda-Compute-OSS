@@ -65,6 +65,64 @@ def test_attention_spec_rejects_invalid_dimensions():
             raise AssertionError(f"AttentionSpec({kwargs!r}) should raise ValueError")
 
 
+def test_attention_spec_rejects_non_integer_fields():
+    # window=2.5 used to construct successfully (only `window < 0` was
+    # checked) and then crash later inside local_window_attention's tensor
+    # slicing -- but only for (seq, window, block_size) combinations where a
+    # block boundary lands on the non-integer value, so it passed for some
+    # configs and crashed for others with a raw TypeError far from the real
+    # cause. It and the other int-typed fields must be rejected at
+    # construction instead. bool is also rejected even though it's a technical
+    # int subclass (isinstance(True, int) is True) -- never a meaningful value
+    # here.
+    for kwargs in (
+        {"batch": 1.5},
+        {"heads": 2.5},
+        {"seq": 10.0},
+        {"dim": 8.5},
+        {"window": 2.5},
+        {"seed": 1.5},
+        {"batch": True},
+        {"window": False},
+    ):
+        try:
+            AttentionSpec(**kwargs)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"AttentionSpec({kwargs!r}) should raise ValueError")
+
+
+def test_attention_spec_rejects_invalid_dtype():
+    # dtype used to construct successfully and only fail later, deep in
+    # data.torch_dtype, as an opaque KeyError.
+    for bad in ("bf16", "float32", "int8", "", "FP16"):
+        try:
+            AttentionSpec(dtype=bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"AttentionSpec(dtype={bad!r}) should raise ValueError")
+    for good in ("fp16", "fp32", "fp64"):
+        AttentionSpec(dtype=good)  # must not raise
+
+
+def test_attention_spec_rejects_invalid_device():
+    # device used to construct successfully and only fail later, deep in
+    # resolve_device (or not at all, for a syntactically-valid-but-wrong
+    # string), well after construction and after generate_qkv had already
+    # started building tensors.
+    for bad in ("gpu", "cuda:abc", "tpu", "cuda:", "", "Cuda:0"):
+        try:
+            AttentionSpec(device=bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"AttentionSpec(device={bad!r}) should raise ValueError")
+    for good in ("auto", "cpu", "mps", "cuda", "cuda:0", "cuda:7"):
+        AttentionSpec(device=good)  # must not raise
+
+
 def test_attention_spec_rejects_invalid_branch_weights():
     for kwargs in (
         {"local_weight": -0.1},
