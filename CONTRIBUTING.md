@@ -201,6 +201,23 @@ uv run python -m eval --n 12000 --pairs 3 --transforms mine --json
 uv run python -m eval --n 12000 --pairs 3 --fill lowrank --data-rank 16 --transforms mine
 ```
 
+> **Installing GPU PyTorch — read this if `torch.cuda.is_available()` is `False`.**
+> The `gpu` extra is just `torch>=2.1`; where its CUDA build comes from is
+> platform-specific:
+> - **Linux:** the default PyPI `torch` already bundles CUDA — `uv sync --extra gpu`
+>   is enough.
+> - **Windows / macOS:** the default PyPI `torch` is **CPU-only**. Install the CUDA
+>   build from PyTorch's own index, e.g.
+>   `uv pip install torch --index-url https://download.pytorch.org/whl/cu128`
+>   (use the CUDA series matching your GPU — **cu128 or newer for Blackwell**), then
+>   run the scorer with the venv **activated** (plain `python -m eval …`), not
+>   `uv run`, so it isn't re-synced back to the CPU wheel.
+> - CUDA wheels lag brand-new Python releases — if CUDA `torch` won't resolve, pin
+>   the venv to **Python 3.12** (`uv venv --python 3.12`) rather than 3.13/3.14.
+>
+> Official scoring runs on the pinned reference container, so this only affects your
+> own local self-run — but your numbers are meaningless on a CPU `torch`.
+
 Rules for an honest local matmul `feat` score:
 
 - Score on **unseen** couples from the same distribution — never special-case the
