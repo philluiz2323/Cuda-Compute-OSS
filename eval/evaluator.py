@@ -30,24 +30,7 @@ from strategy.subspace import default_rank_m
 
 from . import metrics
 from .memory import MemoryProbe
-
-
-#: Per-track accuracy floors (whitepaper 6.2). A strategy scores 0 unless its
-#: accuracy clears its track's floor. Keyed by ``fill``. Full-rank is the honest
-#: hard case (0.80); low-rank is the easy case, so it must clear a higher bar
-#: (0.95); decaying-spectrum sits between (0.90).
-TRACK_FLOORS = {
-    "random": 0.80,             # full-rank track
-    "iota": 0.80,
-    "lowrank": 0.95,            # low-rank track
-    "decaying-spectrum": 0.90,
-}
-DEFAULT_ACCURACY_FLOOR = 0.80
-
-
-def default_floor(fill: str) -> float:
-    """The accuracy floor for ``fill``'s track (see :data:`TRACK_FLOORS`)."""
-    return TRACK_FLOORS.get(fill, DEFAULT_ACCURACY_FLOOR)
+from .tracks import track_floor as default_floor  # re-exported: floor for a fill's track
 
 
 @dataclass
