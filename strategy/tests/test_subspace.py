@@ -237,6 +237,36 @@ def test_public_api():
     assert _rel(C, A @ B) < 1e-3
 
 
+def _decaying_couple(seed, n, rank, alpha=1.0):
+    """A rank-`rank` matrix with k^-alpha singular-value decay (not sharply
+    low-rank): energy concentrates in the leading components with a small tail."""
+    r = np.random.default_rng(seed)
+    U = r.standard_normal((n, rank))
+    weights = np.arange(1, rank + 1, dtype=np.float64) ** -alpha
+    V = r.standard_normal((rank, n)) * weights[:, None]
+    return (U @ V).astype(np.float64)
+
+
+def test_subspace_iter_more_accurate_than_rsvd_on_decaying_spectrum():
+    """#184: orthonormalized power (subspace) iteration sharpens the captured
+    subspace, so on a decaying spectrum where a one-shot rsvd sketch is
+    imperfect (rank > M/3), subspace_iter reconstructs A@B with strictly lower
+    relative error at the same M."""
+    n, m, rank = 256, 60, 96          # rank > M/3 -> one-shot rsvd leaves error
+    A = _decaying_couple(1, n, rank)
+    B = _decaying_couple(2, n, rank)
+    C = A @ B
+    err_rsvd = _rel(_run(A, B, m, "rsvd"), C)
+    err_iter = _rel(_run(A, B, m, "subspace_iter"), C)
+    # Power iteration must not regress, and here meaningfully improves accuracy.
+    assert err_iter < err_rsvd
+    assert err_iter < 0.9 * err_rsvd
+
+
+def test_subspace_iter_registered():
+    assert "subspace_iter" in available()
+
+
 if __name__ == "__main__":
     if not HAVE_GPU:
         print("SKIP  all tests (no CUDA/MPS GPU; CCO computes on GPU only)")

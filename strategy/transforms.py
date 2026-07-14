@@ -173,6 +173,86 @@ class NystromTransform(Transform):
         return 2.0 * n * m * m
 
 
+class SubspaceIterationTransform(Transform):
+    """Orthonormalized power (subspace) iteration range finder.
+
+    ``rsvd`` captures col(A), row(A), row(B) with a single random sketch each.
+    On a *decaying* (not sharply low-rank) spectrum a one-shot sketch leaks
+    energy from the strong directions into the weak tail, capping accuracy at a
+    given M. ``q`` steps of orthonormalized subspace iteration -- the standard
+    sharpening from randomized SVD, ``Y <- orth((M Mᵀ) Y)`` -- pull range(Q)
+    toward the true leading singular subspace, so the same M columns capture the
+    decaying tail far better. At ``q = 0`` this reduces to ``rsvd``'s sketch.
+
+    Streams over A/B (which may be disk-backed) by composing the same
+    ``stream_gemm_right`` / ``stream_gemm_left_t`` primitives ``rsvd`` uses, so
+    it inherits the VRAM budgeting and adds no new streaming code.
+    """
+
+    name = "subspace_iter"
+    power_iters = 2  # q: orthonormalized (M Mᵀ) applications per captured space
+
+    def basis(self, n, m, backend, dtype, A=None, B=None, frac=None):
+        if A is None or B is None:
+            raise ValueError("subspace_iter transform needs A and B")
+        from .subspace import (
+            _DEFAULT_ROW_BLOCK_FRACTION,
+            stream_gemm_left_t,
+            stream_gemm_right,
+        )
+
+        if frac is None:
+            frac = _DEFAULT_ROW_BLOCK_FRACTION
+
+        xp = backend.xp
+        base, rem = divmod(m, 3)
+        widths = [base + (1 if i < rem else 0) for i in range(3)]
+        rng = np.random.default_rng(self.seed)
+
+        def omega(w):
+            return backend.to_device(
+                rng.standard_normal((n, w)).astype(dtype, copy=False)
+            )
+
+        def orth(Y):
+            return self._orthonormalize(Y, backend)
+
+        def sharpen_col(X, Y):
+            # Y <- orth((X Xᵀ) Y): X^T Y then X(...), q times -> col(X).
+            for _ in range(self.power_iters):
+                XtY = stream_gemm_left_t(X, Y, backend, dtype, frac)
+                Y = orth(stream_gemm_right(X, XtY, backend, dtype, frac))
+            return Y
+
+        def sharpen_row(X, Y):
+            # Y <- orth((Xᵀ X) Y): X Y then X^T(...), q times -> row(X).
+            for _ in range(self.power_iters):
+                XY = stream_gemm_right(X, Y, backend, dtype, frac)
+                Y = orth(stream_gemm_left_t(X, XY, backend, dtype, frac))
+            return Y
+
+        parts = []
+        if widths[0]:  # col(A): (A Aᵀ)^q A Ω
+            parts.append(sharpen_col(A, stream_gemm_right(A, omega(widths[0]), backend, dtype, frac)))
+        if widths[1]:  # row(A): (Aᵀ A)^q Aᵀ Ω
+            parts.append(sharpen_row(A, stream_gemm_left_t(A, omega(widths[1]), backend, dtype, frac)))
+        if widths[2]:  # row(B): (Bᵀ B)^q Bᵀ Ω
+            parts.append(sharpen_row(B, stream_gemm_left_t(B, omega(widths[2]), backend, dtype, frac)))
+
+        Y = xp.concatenate(parts, axis=1)        # (n, m)
+        return self._orthonormalize(Y, backend)  # (n, m) orthonormal columns
+
+    def basis_flops(self, n, m):
+        # Per captured space of width w: the initial sketch (2 n² w) plus q
+        # iterations, each two streamed n² products (Xᵀ Y then X(...) = 4 n² w)
+        # and a thin QR (~2 n w²). Widths sum to m, so summed over the three
+        # spaces: (1 + 2q)·2 n² m  +  q·2 n m² (iteration QRs)  +  2 n m² (final
+        # QR). Recomputed every call (depends on A, B); reported so the FLOP
+        # savings are not overstated -- q power steps are 2q× rsvd's sketch cost.
+        q = self.power_iters
+        return (1 + 2 * q) * 2.0 * n * n * m + (q + 1) * 2.0 * n * m * m
+
+
 _REGISTRY: dict[str, type[Transform]] = {}
 
 
@@ -194,5 +274,5 @@ def available() -> list[str]:
     return sorted(_REGISTRY)
 
 
-for _cls in (RandomizedSVDTransform, NystromTransform):
+for _cls in (RandomizedSVDTransform, NystromTransform, SubspaceIterationTransform):
     register_transform(_cls.name, _cls)
