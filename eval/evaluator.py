@@ -139,6 +139,21 @@ def _generate_pairs(ev: EvalConfig):
     return pairs, dt
 
 
+def _crown_best(ranking):
+    """Return the winning transform name, or ``None`` when nothing won.
+
+    ``ranking`` is ``[(name, result), ...]`` sorted by ``score`` descending. A
+    transform's ``score`` is 0 unless it is a genuine improvement over exact
+    (accuracy floor cleared *and* latency/VRAM/FLOPs all better). If the top
+    score is 0 -- everything gated, or nothing dominates exact -- there is no
+    winner: naming the score-0 top row "best" implies an improvement that isn't
+    there (issue #82). Crown a transform only when its score is strictly > 0.
+    """
+    if ranking and ranking[0][1]["score"] > 0:
+        return ranking[0][0]
+    return None
+
+
 def evaluate(ev: EvalConfig) -> dict:
     """Run the full evaluation and return a results dict (see module docstring)."""
     ev = replace(ev, seed=_resolve_seed(ev.seed))
@@ -226,6 +241,7 @@ def evaluate(ev: EvalConfig) -> dict:
 
     ranking = sorted(results.items(), key=lambda kv: kv[1]["score"], reverse=True)
     m = effective_rank_m(ev)
+    best = _crown_best(ranking)
     out = {
         "config": {
             "n": ev.n, "pairs": ev.pairs, "dtype": ev.dtype, "rank_m": m,
@@ -245,7 +261,7 @@ def evaluate(ev: EvalConfig) -> dict:
         },
         "transforms": results,
         "ranking": [name for name, _ in ranking],
-        "best": ranking[0][0] if ranking else None,
+        "best": best,
     }
     if ev.verbose:
         _print_report(out)
@@ -314,4 +330,7 @@ def _print_report(out: dict) -> None:
         print(f"  {name:<10}{r['accuracy']:>10.4f}"
               f"{r['latency_s']*1e3:>11.2f}ms{r['peak_vram_mib']:>9.1f}MiB"
               f"{r['flop_ratio_vs_exact']:>7.1f}x{r['score']:>13.4g}{note}")
-    print(f"  best (highest score): {out['best']}")
+    if out["best"] is None:
+        print("  best: none (no transform beats exact)")
+    else:
+        print(f"  best (highest score): {out['best']}")
