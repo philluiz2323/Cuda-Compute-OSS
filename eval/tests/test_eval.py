@@ -171,7 +171,14 @@ def test_evaluate_smoke():
         assert 0.0 <= r["accuracy"] <= 1.0
         assert r["latency_s"] > 0.0
         assert r["score"] >= 0.0
-    assert out["best"] == "rsvd"
+    # #82: 'best' names the winner only when it actually beat exact (score > 0);
+    # otherwise there is no best. At this tiny n the subspace overhead may not
+    # beat exact, so assert the invariant rather than a fixed winner name (the
+    # old `== "rsvd"` assertion crowned a score-0 row, the bug #82 fixes).
+    if out["transforms"]["rsvd"]["score"] > 0:
+        assert out["best"] == "rsvd"
+    else:
+        assert out["best"] is None
 
 
 @_gpu_only
