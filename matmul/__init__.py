@@ -66,6 +66,8 @@ def matmul(A: np.ndarray, B: np.ndarray, out: np.ndarray | None = None,
             )
         if not out.flags.writeable:
             raise ValueError("out must be writable")
+        if np.shares_memory(out, A) or np.shares_memory(out, B):
+            raise ValueError("out must not share memory with A or B")
     backend = Backend(cfg.device, cfg.verbose)
     C = out if out is not None else np.empty_like(A, dtype=cfg.np_dtype)
     gemm.multiply(A, B, C, backend, cfg)
