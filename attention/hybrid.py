@@ -30,6 +30,11 @@ def _require_integer(name: str, value, *, minimum: int) -> None:
         raise ValueError(f"{name} must be a {qualifier} integer")
 
 
+def _require_bool(name: str, value) -> None:
+    if not isinstance(value, bool):
+        raise ValueError(f"{name} must be a bool")
+
+
 def _position_mask(q0: int, q1: int, k0: int, k1: int, *, window: int, causal: bool, device):
     torch = _torch()
     q_pos = torch.arange(q0, q1, device=device)[:, None]
@@ -49,6 +54,7 @@ def local_window_attention(q, k, v, *, window: int, causal: bool = False, block_
     """
     torch = _torch()
     _require_integer("window", window, minimum=0)
+    _require_bool("causal", causal)
     if block_size is not None:
         _require_integer("block_size", block_size, minimum=1)
 
@@ -88,6 +94,7 @@ def spectral_global_mix(v, *, freq_decay: float = 1.0, causal: bool = False):
     """
     torch = _torch()
     _require_finite_real("freq_decay", freq_decay)
+    _require_bool("causal", causal)
     if freq_decay < 0:
         raise ValueError("freq_decay must be >= 0")
 
@@ -144,6 +151,7 @@ def adaptive_spectral_global_mix(
     torch = _torch()
     _require_finite_real("freq_decay", freq_decay)
     _require_finite_real("gate_strength", gate_strength)
+    _require_bool("causal", causal)
     if freq_decay < 0:
         raise ValueError("freq_decay must be >= 0")
     if gate_strength < 0:
@@ -201,6 +209,7 @@ def correlation_spectral_global_mix(
     torch = _torch()
     _require_finite_real("temperature", temperature)
     _require_finite_real("freq_decay", freq_decay)
+    _require_bool("causal", causal)
     if temperature <= 0:
         raise ValueError("temperature must be > 0")
     if freq_decay < 0:
@@ -339,6 +348,7 @@ def landmark_global_attention(
     """Approximate global attention by attending to selected K/V landmarks."""
     torch = _torch()
     _require_integer("num_landmarks", num_landmarks, minimum=1)
+    _require_bool("causal", causal)
     if policy not in {"pooled", "topk"}:
         raise ValueError("policy must be one of: pooled, topk")
     if policy == "topk" and causal:
