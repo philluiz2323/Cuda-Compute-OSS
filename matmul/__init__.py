@@ -54,6 +54,18 @@ def matmul(A: np.ndarray, B: np.ndarray, out: np.ndarray | None = None,
                 f"{dtype_name!r} ({np.dtype(A.dtype)})"
             )
         cfg = config
+    if out is not None:
+        if out.shape != A.shape:
+            raise ValueError(
+                f"out must have shape {A.shape}, got {out.shape}"
+            )
+        if np.dtype(out.dtype) != cfg.np_dtype:
+            raise ValueError(
+                f"out dtype {np.dtype(out.dtype)} does not match configured dtype "
+                f"{cfg.np_dtype}"
+            )
+        if not out.flags.writeable:
+            raise ValueError("out must be writable")
     backend = Backend(cfg.device, cfg.verbose)
     C = out if out is not None else np.empty_like(A, dtype=cfg.np_dtype)
     gemm.multiply(A, B, C, backend, cfg)
