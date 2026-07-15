@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math
-from numbers import Real
+from numbers import Integral, Real
 
 
 def _torch():
@@ -23,6 +23,13 @@ def _require_finite_real(name: str, value) -> None:
         raise ValueError(f"{name} must be a finite real number")
 
 
+def _require_integer(name: str, value, *, minimum: int) -> None:
+    if (isinstance(value, bool) or not isinstance(value, Integral)
+            or value < minimum):
+        qualifier = "positive" if minimum == 1 else "non-negative"
+        raise ValueError(f"{name} must be a {qualifier} integer")
+
+
 def _position_mask(q0: int, q1: int, k0: int, k1: int, *, window: int, causal: bool, device):
     torch = _torch()
     q_pos = torch.arange(q0, q1, device=device)[:, None]
@@ -41,11 +48,12 @@ def local_window_attention(q, k, v, *, window: int, causal: bool = False, block_
     avoiding materializing a full n x n score matrix.
     """
     torch = _torch()
-    if window < 0:
-        raise ValueError("window must be >= 0")
+    _require_integer("window", window, minimum=0)
+    if block_size is not None:
+        _require_integer("block_size", block_size, minimum=1)
 
     batch, heads, seq, dim = q.shape
-    block = block_size or min(max(64, window or 1), seq)
+    block = block_size if block_size is not None else min(max(64, window or 1), seq)
     out = torch.empty_like(v)
 
     for q0 in range(0, seq, block):
@@ -330,8 +338,7 @@ def landmark_global_attention(
 ):
     """Approximate global attention by attending to selected K/V landmarks."""
     torch = _torch()
-    if num_landmarks <= 0:
-        raise ValueError("num_landmarks must be > 0")
+    _require_integer("num_landmarks", num_landmarks, minimum=1)
     if policy not in {"pooled", "topk"}:
         raise ValueError("policy must be one of: pooled, topk")
     if policy == "topk" and causal:
