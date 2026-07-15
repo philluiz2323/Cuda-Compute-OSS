@@ -43,6 +43,8 @@ class AttentionSpec:
                 raise ValueError(f"{name} must be > 0")
         if self.window < 0:
             raise ValueError("window must be >= 0")
+        if not isinstance(self.causal, bool):
+            raise ValueError("causal must be a bool")
         for name in ("local_weight", "global_weight", "freq_decay"):
             value = getattr(self, name)
             if (isinstance(value, bool) or not isinstance(value, Real)
