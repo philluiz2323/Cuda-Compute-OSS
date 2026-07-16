@@ -90,7 +90,9 @@ def test_plan_contains_sha_check_and_json_output():
         assert "abcdef1234567890" in joined
         assert "python -m eval" in joined
         assert "--json" in joined
-        assert "_results/pr-4-abcdef123456.json" in joined
+        # The planned destination is absolute so it survives the preceding
+        # ``cd`` into the PR worktree; only its separator changes by platform.
+        assert "pr-4-abcdef123456.json" in joined
     finally:
         tmp.cleanup()
 
