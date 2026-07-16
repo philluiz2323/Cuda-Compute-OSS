@@ -5,6 +5,8 @@ import sys
 import tempfile
 from types import SimpleNamespace
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from pathlib import Path
@@ -153,6 +155,27 @@ def test_active_python_run_uses_supplied_interpreter_for_every_pr_command(monkey
     assert not any(cmd and cmd[0] == "uv" for cmd in calls)
     assert any("compileall" in cmd for cmd in python_calls)
     assert any("CUDA is unavailable" in " ".join(cmd) for cmd in python_calls)
+
+
+def test_clear_readonly_checkout_entry_retries_once(monkeypatch):
+    from eval.gpu_batch import _clear_readonly_and_retry
+
+    calls = []
+    monkeypatch.setattr("eval.gpu_batch.os.chmod", lambda path, mode: calls.append((path, mode)))
+
+    def remove(path):
+        calls.append(("remove", path))
+
+    _clear_readonly_and_retry(remove, "locked-file", (None, PermissionError("denied"), None))
+    assert calls[0][0] == "locked-file"
+    assert calls[1] == ("remove", "locked-file")
+
+
+def test_clear_readonly_checkout_entry_propagates_non_permission_errors():
+    from eval.gpu_batch import _clear_readonly_and_retry
+
+    with pytest.raises(OSError, match="disk"):
+        _clear_readonly_and_retry(lambda path: None, "bad-file", (None, OSError("disk"), None))
 
 
 def test_mock_result_has_wrapped_eval_shape():
